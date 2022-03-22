@@ -41,7 +41,7 @@ ENTITY memory IS
 	);
 END memory;
 
-ARCHITECTURE rtl OF memory IS
+ARCHITECTURE behavior OF memory IS
 	TYPE INST_MEM IS ARRAY(inst_ram_size-1 downto 0) OF STD_LOGIC_VECTOR(word_size-1 DOWNTO 0);
 	TYPE DATA_MEM IS ARRAY(data_ram_size-1 downto 0) OF STD_LOGIC_VECTOR(word_size-1 DOWNTO 0);
 	
@@ -66,6 +66,9 @@ ARCHITECTURE rtl OF memory IS
 			readline(f, aline);
 			read(aline, instruction);
 			mem(i) <= instruction;
+			if (endfile(f)) then
+				exit;
+			end if;
 		end loop;
 		file_close(f);
 	end load_instruction_from_file;
@@ -88,7 +91,7 @@ BEGIN
     -- read initial
 	read_process: PROCESS(memload)
 	BEGIN
-		IF (memload'event AND memload = '1') THEN
+		IF (memload = '1') THEN
 			load_instruction_from_file(inst_ram_block);
 		END IF;
 	END PROCESS;
@@ -145,4 +148,4 @@ BEGIN
 	waitrequest <= write_waitreq_reg and read_waitreq_reg;
 
 
-END rtl;
+END behavior;
