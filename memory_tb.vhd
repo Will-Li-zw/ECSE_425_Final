@@ -15,7 +15,7 @@ generic(
     data_ram_size : INTEGER := 32768;			-- BYTE ADDRESSABILITY; 8192 words data
     word_size : INTEGER := 32;
     byte_size : INTEGER := 8;
-    mem_delay : time := 0.1 ns;			-- to make life easier, mem_dealy is 0.1 CC
+    mem_delay : time := 1 ns;			-- to make life easier, mem_dealy is 0.1 CC
     clock_period : time := 1 ns;
 
     -- path definition
@@ -45,13 +45,6 @@ end component;
 signal clk : std_logic := '0';
 constant clk_period : time := 1 ns;
 
-signal s_addr : std_logic_vector (31 downto 0);
-signal s_read : std_logic := '0';
-signal s_readdata : std_logic_vector (31 downto 0);
-signal s_write : std_logic := '0';
-signal s_writedata : std_logic_vector (31 downto 0);
-signal s_waitrequest : std_logic;
-
 signal i_addr : integer range 0 to 1023;      
 signal d_addr : integer range 0 to 8191;        
 
@@ -59,7 +52,7 @@ signal i_read : std_logic := '0';
 signal d_read : std_logic := '0';
 
 signal m_readdata : std_logic_vector (31 downto 0);
-signal m_write : std_logic;
+signal m_write : std_logic := '0';
 signal m_writedata : std_logic_vector (31 downto 0);
 signal m_waitrequest : std_logic; 
 
@@ -102,23 +95,8 @@ end process;
 -- test process
 test_process : process
 begin
-	-- Test read miss, replace from memory
+    
 	wait for clk_period;
-	-- s_addr <= x"00000004";               -- read from index 1   0000 0000 0000 0000 0000 0000 0000 0100
-	-- s_read <= '1';
-	-- wait until rising_edge(s_waitrequest);
-	-- assert s_readdata = x"00060504" report "write unsuccessful" severity error;
-	-- s_read <= '0';
-	
-	-- wait for clk_period;
-	
-	-- -- Test write hit, replace from memory
-	-- s_addr <= x"00000008";               -- read from index 1   0000 0000 0000 0000 0000 0000 0000 1000
-	-- s_write <= '1';
-	-- s_writedata <= x"11111111";			-- 4 Bytes write
-	-- wait until rising_edge(s_waitrequest);
-	-- assert s_readdata = x"11111111" report "write unsuccessful" severity error;
-	-- s_write <= '0';
 	
     m_load <= '1';
     wait for clk_period;
@@ -134,8 +112,31 @@ begin
     wait until rising_edge(m_waitrequest);
     assert m_readdata = x"200F0004" report "Test1: Failed, read instruction unsuccessful" severity error;
     i_read <= '0';
-	wait;
+
+	wait for clk_period;
 	
+    -- try to write the data memory
+    report "Test2: data memory write";
+    d_addr <= 4;
+    m_write <= '1';
+    m_writedata <= x"100B0004";
+    wait until rising_edge(m_waitrequest);
+    m_write <= '0';
+    d_addr <= 4;    -- initiate a data read
+    d_read <= '1';
+    wait until rising_edge(m_waitrequest);
+    assert m_readdata = x"100B0004" report "Test2: Failed, write data unsuccessful" severity error;
+    d_read <= '0';
+
+    wait for clk_period;
+
+    report "Test3: data memory I/O";
+    m_output <= '1';
+    wait for clk_period;
+    m_output <= '0';
+
+    wait;
+
 end process;
 	
 end;

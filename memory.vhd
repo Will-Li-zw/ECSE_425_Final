@@ -17,7 +17,7 @@ ENTITY memory IS
 		data_ram_size : INTEGER := 32768;			-- BYTE ADDRESSABILITY; 8192 words data
 		word_size : INTEGER := 32;
 		byte_size : INTEGER := 8;
-		mem_delay : time := 0.1 ns;			-- to make life easier, mem_dealy is 0.1 CC
+		mem_delay : time := 1 ns;			-- to make life easier, mem_dealy is 0.1 CC
 		clock_period : time := 1 ns;
 
 		-- path definition
@@ -85,7 +85,7 @@ ARCHITECTURE behavior OF memory IS
 	procedure output_data_to_file (mem : DATA_MEM) is
 		file     	f  : text;
 		variable aline : line;
-		variable i: integer range 0 to inst_ram_size-1 := 0;	-- loop counter
+		variable i: integer range 0 to inst_ram_size+4 := 0;	-- loop counter
 	begin
 		file_open(f, dataoutput_filepath, write_mode);
 		L1: while i < inst_ram_size-1 loop
@@ -119,12 +119,16 @@ BEGIN
 	BEGIN
 		--This is the actual synthesizable SRAM block
 		IF (clock'event AND clock = '1') THEN
+			-- 1. mem write
 			-- only data memory can be written
 			IF (memwrite = '1') THEN
-				data_ram_block(data_address) <= writedata;
+				data_ram_block(data_address) <= writedata(7 downto 0);
+				data_ram_block(data_address+1) <= writedata(15 downto 8);
+				data_ram_block(data_address+2) <= writedata(23 downto 16);
+				data_ram_block(data_address+3) <= writedata(31 downto 24);
 			END IF;
 			
-
+			-- 2. mem read
 			IF (instmemread = '1') THEN
 				-- read_inst_addr_reg <= inst_address;
 				readdata <= inst_ram_block(inst_address+3) & inst_ram_block(inst_address+2) 
