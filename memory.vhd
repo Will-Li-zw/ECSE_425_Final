@@ -10,21 +10,23 @@ USE std.textio.all;						 -- package for io keywords: file_open()
 ENTITY memory IS
 	-------------------------------------------------------------------------------
 	-- This memory unit contains two separate array to store instuction and data --
+	-- Each memory array is using little Endian -----------------------------------
 	-------------------------------------------------------------------------------
 	GENERIC(
-		inst_ram_size : INTEGER := 1024;			-- WORD ADDRESSABILITY; at most 1024 instructions
-		data_ram_size : INTEGER := 8192;			-- WORD ADDRESSABILITY; 8192 words data
+		inst_ram_size : INTEGER := 4096;			-- BYTE ADDRESSABILITY; at most 1024 instructions
+		data_ram_size : INTEGER := 32768;			-- BYTE ADDRESSABILITY; 8192 words data
 		word_size : INTEGER := 32;
+		byte_size : INTEGER := 8;
 		mem_delay : time := 0.1 ns;			-- to make life easier, mem_dealy is 0.1 CC
 		clock_period : time := 1 ns;
 
 		-- path definition
-		dataoutput_filepath: string := "memory.txt";		-- TODO: is the output memory only for data?
+		dataoutput_filepath: string := "memory.txt";   -- only data memory output
 		instruction_filepath : string := "program.txt"
 	);
 	PORT (
 		clock: IN STD_LOGIC;
-		writedata: IN STD_LOGIC_VECTOR (word_size-1 DOWNTO 0);    -- WORD ADDRESSABILITY; However, only data memory can be written
+		writedata: IN STD_LOGIC_VECTOR (word_size-1 DOWNTO 0);  -- pass in a WORD; However, only data memory can be written
 		memwrite: IN STD_LOGIC;							-- write reqeust for data
 		
 		inst_address: IN INTEGER RANGE 0 TO inst_ram_size-1;
@@ -33,7 +35,7 @@ ENTITY memory IS
 		datamemread: IN STD_LOGIC;						-- read request for data
 		instmemread: IN STD_LOGIC;						-- read request for instruction
 
-		readdata: OUT STD_LOGIC_VECTOR (word_size-1 DOWNTO 0);	-- WORD ADDRESSABILITY
+		readdata: OUT STD_LOGIC_VECTOR (word_size-1 DOWNTO 0);	-- pass out a WORD
 		waitrequest: OUT STD_LOGIC;
 
 		memload: IN STD_LOGIC;			-- signal to load initial instructions from "program.txt"	
@@ -42,8 +44,8 @@ ENTITY memory IS
 END memory;
 
 ARCHITECTURE behavior OF memory IS
-	TYPE INST_MEM IS ARRAY(inst_ram_size-1 downto 0) OF STD_LOGIC_VECTOR(word_size-1 DOWNTO 0);
-	TYPE DATA_MEM IS ARRAY(data_ram_size-1 downto 0) OF STD_LOGIC_VECTOR(word_size-1 DOWNTO 0);
+	TYPE INST_MEM IS ARRAY(inst_ram_size-1 downto 0) OF STD_LOGIC_VECTOR(byte_size-1 DOWNTO 0);
+	TYPE DATA_MEM IS ARRAY(data_ram_size-1 downto 0) OF STD_LOGIC_VECTOR(byte_size-1 DOWNTO 0);
 	
 	SIGNAL inst_ram_block: INST_MEM := (others=>(others=>'0'));   -- Initialize instruction memory to 0s
 	SIGNAL data_ram_block: DATA_MEM := (others=>(others=>'0'));   -- Initialize data memory to 0s
@@ -60,14 +62,20 @@ ARCHITECTURE behavior OF memory IS
 		file 	 f: text;			-- opened file
 		variable aline: line;		-- a line
 		variable instruction: std_logic_vector(word_size-1 DOWNTO 0);	-- turn line into std_logic_vector
+		variable i: integer range 0 to inst_ram_size-1 := 0;	-- loop counter
 	begin
 		file_open(f, instruction_filepath, read_mode);
-		for i in 0 to inst_ram_size-1 loop			-- TODO: what if filesize not upto inst_ram_size?
+		L1: while i < inst_ram_size-1 loop		
 			readline(f, aline);
 			read(aline, instruction);
-			mem(i) <= instruction;
-			if (endfile(f)) then
-				exit;
+			-- parse instruction into 4 parts
+			mem(i) <= instruction(7 downto 0);	-- NOTE: because I assign the signal, it needs to be defined as OUT signal in paramter
+			mem(i+1) <= instruction(15 downto 8);
+			mem(i+2) <= instruction(23 downto 16);
+			mem(i+3) <= instruction(31 downto 24);
+			i := i+4;	-- update counter by a word
+			if (endfile(f)) then				-- if reached EOF, exit loop early
+				exit L1;
 			end if;
 		end loop;
 		file_close(f);
@@ -77,12 +85,13 @@ ARCHITECTURE behavior OF memory IS
 	procedure output_data_to_file (mem : DATA_MEM) is
 		file     	f  : text;
 		variable aline : line;
+		variable i: integer range 0 to inst_ram_size-1 := 0;	-- loop counter
 	begin
-		--TODO: Add generics for the paths
 		file_open(f, dataoutput_filepath, write_mode);
-		for i in 0 to data_ram_size-1 loop
-			write(aline, mem(i));		-- pass content of aline
+		L1: while i < inst_ram_size-1 loop
+			write(aline, mem(i+3) & mem(i+2) & mem(i+1) & mem(i));		-- pass content of aline
 			writeline(f, aline);		-- put line into the output file
+			i := i+4;					-- update counter by 4(a word offset)
 		end loop;
 		file_close(f);
 	end output_data_to_file;
@@ -118,11 +127,13 @@ BEGIN
 
 			IF (instmemread = '1') THEN
 				-- read_inst_addr_reg <= inst_address;
-				readdata <= inst_ram_block(inst_address);
+				readdata <= inst_ram_block(inst_address+3) & inst_ram_block(inst_address+2) 
+								& inst_ram_block(inst_address+1) & inst_ram_block(inst_address);
 			END IF;
 			IF (datamemread = '1') THEN
 				-- read_address_reg <= data_address;
-				readdata <= data_ram_block(data_address);
+				readdata <= data_ram_block(data_address+3) & data_ram_block(data_address+2)
+								& data_ram_block(data_address+1) & data_ram_block(data_address);
 			END IF;
 
 		END IF;

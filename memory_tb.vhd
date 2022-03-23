@@ -11,14 +11,15 @@ architecture behavior of memory_tb is
 
 component memory is
 generic(
-    inst_ram_size : INTEGER := 1024;			-- WORD ADDRESSABILITY; at most 1024 instructions
-    data_ram_size : INTEGER := 8192;			-- WORD ADDRESSABILITY; 8192 words data
+    inst_ram_size : INTEGER := 4096;			-- BYTE ADDRESSABILITY; at most 1024 instructions
+    data_ram_size : INTEGER := 32768;			-- BYTE ADDRESSABILITY; 8192 words data
     word_size : INTEGER := 32;
+    byte_size : INTEGER := 8;
     mem_delay : time := 0.1 ns;			-- to make life easier, mem_dealy is 0.1 CC
     clock_period : time := 1 ns;
 
     -- path definition
-    dataoutput_filepath: string := "memory.txt";		-- TODO: is the output memory only for data?
+    dataoutput_filepath: string := "memory.txt";   -- only data memory output
     instruction_filepath : string := "program.txt"
 );
 port(
@@ -54,8 +55,8 @@ signal s_waitrequest : std_logic;
 signal i_addr : integer range 0 to 1023;      
 signal d_addr : integer range 0 to 8191;        
 
-signal i_read : std_logic;
-signal d_read : std_logic;
+signal i_read : std_logic := '0';
+signal d_read : std_logic := '0';
 
 signal m_readdata : std_logic_vector (31 downto 0);
 signal m_write : std_logic;
@@ -79,8 +80,8 @@ port map (
     inst_address => i_addr,
     data_address => d_addr,
 
-    datamemread => i_read,
-    instmemread => d_read,
+    datamemread => d_read,
+    instmemread => i_read,
 
     readdata => m_readdata,
     waitrequest => m_waitrequest,
@@ -123,6 +124,16 @@ begin
     wait for clk_period;
     m_load <= '0';
 
+    wait for clk_period;
+    wait for clk_period/2;
+
+    -- try to read the instruction
+    report "Test1: instruction memory read";
+    i_addr <= 4;
+    i_read <= '1';
+    wait until rising_edge(m_waitrequest);
+    assert m_readdata = x"200F0004" report "Test1: Failed, read instruction unsuccessful" severity error;
+    i_read <= '0';
 	wait;
 	
 end process;
