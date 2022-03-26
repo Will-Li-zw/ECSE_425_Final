@@ -8,16 +8,23 @@ END fetchStage_tb;
  
 ARCHITECTURE behavior OF fetchStage_tb IS 
   
-    COMPONENT fetcher
+    COMPONENT fetchStage
     PORT(
-         clk : IN  std_logic;
-         reset : IN  std_logic;
-         if_ctrl_pcSrc : IN  std_logic;
-         if_jump_addr : IN  std_logic_vector(31 downto 0);
-         if_ctrl_jump : IN  std_logic;
-        --  if_branchAddr : IN  std_logic_vector(31 downto 0);
-         pc : OUT  std_logic_vector(31 downto 0);
-         instruction_out : OUT  std_logic_vector(31 downto 0)
+clk: in std_logic;
+        reset: in std_logic;
+        stall: in std_logic:='0';
+        stall_number: in std_logic_vector(31 downto 0):=(others=>'0');
+        processor_enable: in std_logic:='0';
+
+        -- input from WB
+        if_jump_addr: in std_logic_vector (31 downto 0):=(others=>'0'); --TODO: from decode stage
+        if_branchAddr: in std_logic_vector (31 downto 0):=(others=>'0'); -- TODO: from memory step
+        if_ctrl_pcSrc: in std_logic := '0';
+        if_ctrl_jump: in std_logic := '0';
+
+        -- output
+        pc: out STD_LOGIC_VECTOR (31 downto 0) := (others => '0');
+        instruction_out: out STD_LOGIC_VECTOR (31 downto 0) := (others => '0')
         );
     END COMPONENT;
     
@@ -31,16 +38,16 @@ ARCHITECTURE behavior OF fetchStage_tb IS
    signal if_branchAddr : std_logic_vector(31 downto 0) := (others => '0');
 
  	--Outputs
-   signal pc : std_logic_vector(31 downto 0);
-   signal instruction_out : std_logic_vector(31 downto 0);
+   signal pc : STD_LOGIC_VECTOR (31 downto 0) := (others => '0');
+   signal instruction_out : STD_LOGIC_VECTOR (31 downto 0) := (others => '0');
 
    -- Clock period definitions
-   constant clk_period : time := 10 ns;
+   constant clk_period : time := 1 ns;
  
 BEGIN
  
 	-- Instantiate the Unit Under Test (UUT)
-   uut: fetcher PORT MAP (
+   dut: fetchStage PORT MAP (
           clk => clk,
           reset => reset,
           if_ctrl_pcSrc => if_ctrl_pcSrc,
@@ -64,20 +71,18 @@ BEGIN
    -- Stimulus process
    stim_proc: process
    begin		
-      -- hold reset state for 100 ns.
-      wait for 100 ns;	
 
-      wait for clk_period*10;
+      wait for clk_period;
 
       -- insert stimulus here 
 		 --Inputs
 		
 		reset <= '1';
 		
-		wait for clk_period*10;
+		wait for clk_period;
 		reset <= '0';
 		
-		wait for clk_period*100;
+		wait for clk_period;
 		
 		--if_jump_addr <= (others => '0');
 		if_branchAddr <= "00000000000000000000000011110000";
@@ -90,7 +95,7 @@ BEGIN
 		if_ctrl_pcSrc <= '0';
 		if_ctrl_jump <= '0';
 		
-		wait for clk_period*100;
+		wait for clk_period;
 		
 		if_jump_addr <= "00000000000000000000000000000010";
 		
