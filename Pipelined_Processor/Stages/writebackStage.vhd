@@ -48,7 +48,7 @@ begin
         output => MUX_output,
     );
 
-    writeback: process(clock, reset)
+    writeback: process(clock)
     begin
         -- passing control signal 
         reg_file_enable_out <= reg_file_enable_in;
