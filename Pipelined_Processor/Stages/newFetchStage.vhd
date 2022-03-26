@@ -23,7 +23,7 @@ entity newFetchStage is
 end newFetchStage;
 
 architecture implementation of newFetchStage is
-    component MUX is
+    component TWOMUX is
 		generic (
 
         ); 
@@ -58,21 +58,21 @@ architecture implementation of newFetchStage is
 begin
 
     -- TODO: MUX branch
-    mux_branch: MUX port map(
+    mux_branch: TWOMUX port map(
         sel => if_ctrl_pcSrc,
         input0 => adder1_output,
         input1 => if_branchAddr,
         output => mux_branch_output
     );
 
-    mux_jump : MUX port map(
+    mux_jump : TWOMUX port map(
 	    sel => if_ctrl_jump,	
         input0 => mux_branch_output,
         input1 => if_jump_addr,
         output => mux_jump_output
 	);
 
-    stall : MUX port map(
+    stall : TWOMUX port map(
 	    sel => stall,	
         input0 => mux_jump_output,
         input1 => stall_number,
