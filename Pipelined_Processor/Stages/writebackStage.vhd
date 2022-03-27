@@ -22,7 +22,7 @@ entity writebackStage is
 
         -- output signals
         reg_file_enable_out: out std_logic;
-        reg_address_out: in std_logic_vector (reg_address_width-1 downto 0);
+        reg_address_out: out std_logic_vector (reg_address_width-1 downto 0);
         write_data: out std_logic_vector (word_width-1 downto 0);
     );
 end writebackStage;
@@ -50,11 +50,13 @@ begin
 
     writeback: process(clock, reset)
     begin
-        -- passing control signal 
-        reg_file_enable_out <= reg_file_enable_in;
-        -- passing data and reg address for update in decode
-        reg_address_out <= reg_address_in;
-        write_data <= MUX_output;
+        if rising_edge(clk) then
+            -- passing control signal 
+            reg_file_enable_out <= reg_file_enable_in;
+            -- passing data and reg address for update in decode
+            reg_address_out <= reg_address_in;
+            write_data <= MUX_output;
+        end if;
     end process;
 
 end Behavior;
