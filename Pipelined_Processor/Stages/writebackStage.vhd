@@ -33,10 +33,10 @@ architecture Behavior of writebackStage is
 
     component TWOMUX is
         PORT(
-			sel : in std_logic;
-			input0 : in std_logic_vector (word_width-1 downto 0);
-			input1 : in std_logic_vector (word_width-1 downto 0);
-			output : out std_logic_vector (word_width-1 downto 0);
+		sel : in std_logic;
+		input0 : in std_logic_vector (word_width-1 downto 0);
+		input1 : in std_logic_vector (word_width-1 downto 0);
+		output : out std_logic_vector (word_width-1 downto 0);
        );
     end component;
 
@@ -48,7 +48,7 @@ begin
         output => MUX_output,
     );
 
-    writeback: process(clock, reset)
+    writeback: process(clock)
     begin
         if rising_edge(clk) then
             -- passing control signal 
