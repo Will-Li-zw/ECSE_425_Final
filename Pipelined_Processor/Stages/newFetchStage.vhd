@@ -7,7 +7,7 @@ entity newFetchStage is
         clk: in std_logic;
         reset: in std_logic;
         stall: in std_logic:='0';
-        stall_number: in std_logic_vector(31 downto 0):=(others=>'0');
+        stall_number: in std_logic_vector(31 downto 0):=(other=>'0');
         processor_enable: in std_logic:='0';
 
         -- input from WB
@@ -24,6 +24,9 @@ end newFetchStage;
 
 architecture implementation of newFetchStage is
     component TWOMUX is
+		generic (
+
+        ); 
 		Port (
 			sel : IN STD_LOGIC;
 			input0 : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
@@ -33,12 +36,15 @@ architecture implementation of newFetchStage is
 	end component;
 
     component ADDER is
+        generic (
+
+        );
         port (
             X: in std_logic_vector(31 downto 0);
             Y: in std_logic_vector(31 downto 0);
             CIN: in std_logic;
             COUT: out std_logic;
-            R: out std_logic_vector(31 downto 0)
+            R: out std_logic
         );
     end component;
 
@@ -66,7 +72,7 @@ begin
         output => mux_jump_output
 	);
 
-    staller : TWOMUX port map(
+    stall : TWOMUX port map(
 	    sel => stall,	
         input0 => mux_jump_output,
         input1 => stall_number,
@@ -93,4 +99,3 @@ begin
         end if;
     end process;
 end implementation; 
-
