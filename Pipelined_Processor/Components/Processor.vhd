@@ -98,14 +98,15 @@ begin
       jump_addr      => de_jump_addr,
       branch_addr    => ex_branch_addr,
 
-      pc             => inst_addr_buffer,
+      pc             => inst_read_addr,
       pc_next        => pc_next_value
    );
 
-   	inst_read_addr <= inst_addr_buffer;	 -- might cause sync error
+
+   	--inst_read_addr <= inst_addr_buffer;	 -- might cause sync error
 
 	-- output instread_req
-	instruction_read : process(reset, inst_addr_buffer)
+	instruction_read : process(reset)
 	begin	
 			-- when pc is available, output inst_read_req = '1'
 			if reset = '1' then -- reset all control signal

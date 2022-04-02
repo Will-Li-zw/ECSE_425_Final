@@ -87,10 +87,12 @@ ARCHITECTURE behavior OF Pipelined_MIPS_Processor IS
     signal read_data    : std_logic_vector (word_size-1 downto 0);
     signal inst_addr    : std_logic_vector (word_size-1 downto 0);
     signal data_addr    : std_logic_vector (word_size-1 downto 0);
+    signal write_data   : std_logic_vector(word_size-1 downto 0);
+    -- control signals
     signal write_req    : std_logic;
     signal instread_req : std_logic := '0';        -- instruction read request
     signal dataread_req : std_logic := '0';        -- data read request
-    signal write_data   : std_logic_vector(word_size-1 downto 0);
+    
     signal wait_request : std_logic;
 
 BEGIN
