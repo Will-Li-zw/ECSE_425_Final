@@ -29,13 +29,14 @@ ENTITY memory IS
 		writedata: IN STD_LOGIC_VECTOR (word_size-1 DOWNTO 0);  -- pass in a WORD; However, only data memory can be written
 		memwrite: IN STD_LOGIC;							-- write reqeust for data
 		
-		inst_address: IN INTEGER RANGE 0 TO inst_ram_size-1;
-		data_address: IN INTEGER RANGE 0 TO data_ram_size-1;
+		inst_address: in std_logic_vector (word_size-1 DOWNTO 0);
+		data_address: in std_logic_vector (word_size-1 DOWNTO 0);
 
 		datamemread: IN STD_LOGIC;						-- read request for data
 		instmemread: IN STD_LOGIC;						-- read request for instruction
 
-		readdata: OUT STD_LOGIC_VECTOR (word_size-1 DOWNTO 0);	-- pass out a WORD
+		readdata: OUT STD_LOGIC_VECTOR (word_size-1 DOWNTO 0);	-- output data
+		readinst: out std_logic_vector (word_size-1 DOWNTO 0);  -- output instruction
 		waitrequest: OUT STD_LOGIC;
 
 		memload: IN STD_LOGIC;			-- signal to load initial instructions from "program.txt"	
@@ -55,6 +56,9 @@ ARCHITECTURE behavior OF memory IS
 
 	SIGNAL write_waitreq_reg: STD_LOGIC := '1';
 	SIGNAL read_waitreq_reg: STD_LOGIC := '1';
+
+	-- signal inst_addr_int : integer;
+	-- signal data_addr_int : integer;
 
 
 	-- load instructions from "program.txt"
@@ -97,6 +101,9 @@ ARCHITECTURE behavior OF memory IS
 	end output_data_to_file;
 
 BEGIN
+	-- inst_addr_int <= to_integer( unsigned(inst_address) ); will cause sync error!
+	-- data_addr_int <= to_integer( unsigned(data_address) );
+
     -- read initial
 	read_process: PROCESS(memload)
 	BEGIN
@@ -115,29 +122,35 @@ BEGIN
 
 
 	--This is the main section of the SRAM model
-	mem_process: PROCESS (clock)
+	mem_process: PROCESS (clock, inst_address, data_address)
+	-- integer index for accessing the MEM ARRAY
+	variable inst_addr_int : integer := 0;
+	variable data_addr_int : integer := 0;
 	BEGIN
+		inst_addr_int := to_integer( unsigned(inst_address) );
+		data_addr_int := to_integer( unsigned(data_address) );
 		--This is the actual synthesizable SRAM block
 		IF (clock'event AND clock = '1') THEN
 			-- 1. mem write
 			-- only data memory can be written
 			IF (memwrite = '1') THEN
-				data_ram_block(data_address) <= writedata(7 downto 0);
-				data_ram_block(data_address+1) <= writedata(15 downto 8);
-				data_ram_block(data_address+2) <= writedata(23 downto 16);
-				data_ram_block(data_address+3) <= writedata(31 downto 24);
+				data_ram_block(data_addr_int) <= writedata(7 downto 0);
+				data_ram_block(data_addr_int+1) <= writedata(15 downto 8);
+				data_ram_block(data_addr_int+2) <= writedata(23 downto 16);
+				data_ram_block(data_addr_int+3) <= writedata(31 downto 24);
 			END IF;
 			
-			-- 2. mem read
+			-- 2. mem read 
+			-- instruction read & data read could be parallel processing at same time.
 			IF (instmemread = '1') THEN
 				-- read_inst_addr_reg <= inst_address;
-				readdata <= inst_ram_block(inst_address+3) & inst_ram_block(inst_address+2) 
-								& inst_ram_block(inst_address+1) & inst_ram_block(inst_address);
+				readinst <= inst_ram_block(inst_addr_int+3) & inst_ram_block(inst_addr_int+2) 
+								& inst_ram_block(inst_addr_int+1) & inst_ram_block(inst_addr_int);
 			END IF;
 			IF (datamemread = '1') THEN
 				-- read_address_reg <= data_address;
-				readdata <= data_ram_block(data_address+3) & data_ram_block(data_address+2)
-								& data_ram_block(data_address+1) & data_ram_block(data_address);
+				readdata <= data_ram_block(data_addr_int+3) & data_ram_block(data_addr_int+2)
+								& data_ram_block(data_addr_int+1) & data_ram_block(data_addr_int);
 			END IF;
 
 		END IF;
@@ -150,14 +163,14 @@ BEGIN
 	waitreq_w_proc: PROCESS (memwrite)
 	BEGIN
 		IF(memwrite'event AND memwrite = '1')THEN
-			write_waitreq_reg <= '0' after mem_delay, '1' after mem_delay + clock_period;
+			write_waitreq_reg <= '0' after 0.25 ns, '1' after 0.50 ns;
 		END IF;
 	END PROCESS;
 
 	waitreq_r_proc: PROCESS (instmemread, datamemread)
 	BEGIN
 		IF((instmemread'event AND instmemread = '1') OR (datamemread'event AND datamemread = '1'))THEN
-			read_waitreq_reg <= '0' after mem_delay, '1' after mem_delay + clock_period;
+			read_waitreq_reg <= '0' after 0.25 ns, '1' after 0.50 ns;
 		END IF;
 	END PROCESS;
 	waitrequest <= write_waitreq_reg and read_waitreq_reg;
