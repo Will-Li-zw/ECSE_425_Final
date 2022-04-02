@@ -16,6 +16,7 @@ ENTITY Pipelined_MIPS_Processor IS
 	);
 	PORT (
 		clock       : in std_logic;            -- top level clock
+        reset       : in std_logic;            -- highest-level reset signal
 
 		memload     : in std_logic;			-- signal to load initial instructions from "program.txt"	
 		memoutput   : in std_logic			-- signal to write output file
@@ -26,26 +27,29 @@ ARCHITECTURE behavior OF Pipelined_MIPS_Processor IS
     -- components declaration
     component Processor is 
     generic(
-        word_size : INTEGER := 32;
-        registeroutput_filepath : string := "register_file.txt"
-    );
-    port(
-        clock       : in std_logic;
+		clock_period : time := 1 ns;
+		word_size : INTEGER := 32;
+		registeroutput_filepath : string := "register_file.txt"
+	);
+	port (
+		clock       : in std_logic;
+		reset 		: in std_logic;
+
         instruction : in std_logic_vector(word_size-1 downto 0);
         read_data   : in std_logic_vector(word_size-1 downto 0);
         
-        pc          : out integer;
-        data_addr   : out integer;
-        write_req   : out std_logic;
-        instread_req : out std_logic;
-        dataread_req : out std_logic;
-        write_data  : out std_logic_vector(word_size-1 downto 0)
-    );
+        datawrite_req   : out std_logic;
+        instread_req	: out std_logic;
+        dataread_req	: out std_logic;
+		inst_read_addr  : out std_logic_vector(word_size-1 downto 0);
+        data_read_addr  : out std_logic_vector(word_size-1 downto 0);
+        write_data  	: out std_logic_vector(word_size-1 downto 0)
+	);
     end component;
 
     component memory is 
-    generic(
-        inst_ram_size : INTEGER := 4096;			-- BYTE ADDRESSABILITY; at most 1024 instructions
+    GENERIC(
+		inst_ram_size : INTEGER := 4096;			-- BYTE ADDRESSABILITY; at most 1024 instructions
 		data_ram_size : INTEGER := 32768;			-- BYTE ADDRESSABILITY; 8192 words data
 		word_size : INTEGER := 32;
 		byte_size : INTEGER := 8;
@@ -55,32 +59,34 @@ ARCHITECTURE behavior OF Pipelined_MIPS_Processor IS
 		-- path definition
 		dataoutput_filepath: string := "memory.txt";   -- only data memory output
 		instruction_filepath : string := "program.txt"
-    );
-    port(
-        clock: in std_logic;
-		writedata: in std_logic_vector(word_size-1 DOWNTO 0);  -- pass in a WORD; However, only data memory can be written
-		memwrite: in std_logic;							-- write reqeust for data
+	);
+	PORT (
+		clock: IN STD_LOGIC;
+		writedata: IN STD_LOGIC_VECTOR (word_size-1 DOWNTO 0);  -- pass in a WORD; However, only data memory can be written
+		memwrite: IN STD_LOGIC;							-- write reqeust for data
 		
-		inst_address: in integer RANGE 0 TO inst_ram_size-1;
-		data_address: in integer RANGE 0 TO data_ram_size-1;
+		inst_address: in std_logic_vector (word_size-1 DOWNTO 0);
+		data_address: in std_logic_vector (word_size-1 DOWNTO 0);
 
-		datamemread: in std_logic;						-- read request for data
-		instmemread: in std_logic;						-- read request for instruction
+		datamemread: IN STD_LOGIC;						-- read request for data
+		instmemread: IN STD_LOGIC;						-- read request for instruction
 
-		readdata: out std_logic_vector(word_size-1 DOWNTO 0);	-- pass out a WORD
-		waitrequest: out std_logic;
+		readdata: OUT STD_LOGIC_VECTOR (word_size-1 DOWNTO 0);	-- output data
+		readinst: out std_logic_vector (word_size-1 DOWNTO 0);  -- output instruction
+		waitrequest: OUT STD_LOGIC;
 
-		memload: in std_logic;			-- signal to load initial instructions from "program.txt"	
-		memoutput: in std_logic			-- signal to write output file
-    );
+		memload: IN STD_LOGIC;			-- signal to load initial instructions from "program.txt"	
+		memoutput: IN STD_LOGIC			-- signal to write output file
+	);
     end component;   
 
     -- local variables
     
-    signal instruction  : std_logic_vector (word_size-1 downto 0);
+    signal instruction_bus  : std_logic_vector (word_size-1 downto 0);  -- instruction returned by mem
+    signal data_bus         : std_logic_vector (word_size-1 downto 0);  -- data returned by mem
     signal read_data    : std_logic_vector (word_size-1 downto 0);
-    signal inst_addr    : integer range 0 to inst_ram_size-1;
-    signal data_addr    : integer range 0 to data_ram_size-1;
+    signal inst_addr    : std_logic_vector (word_size-1 downto 0);
+    signal data_addr    : std_logic_vector (word_size-1 downto 0);
     signal write_req    : std_logic;
     signal instread_req : std_logic := '0';        -- instruction read request
     signal dataread_req : std_logic := '0';        -- data read request
@@ -88,20 +94,22 @@ ARCHITECTURE behavior OF Pipelined_MIPS_Processor IS
     signal wait_request : std_logic;
 
 BEGIN
-
-    my_processor : processor
+    -- define my processor
+    my_processor : Processor
     port map(
+        -- inputs
         clock       => clock,
-        instruction => instruction,
-        read_data   => read_data,
+        reset       => reset,
+        instruction => instruction_bus, -- input inst from mem
+        read_data   => data_bus,        -- input data from mem
 
-        pc          => inst_addr,
-        
-        data_addr   => data_addr,
-        write_req   => write_req,
-        instread_req => instread_req,
-        dataread_req => dataread_req,
-        write_data  => write_data
+        -- outputs
+        datawrite_req => write_req,  -- request to write DATAMEM
+        instread_req => instread_req,   -- request to read INSTMEM
+        dataread_req => dataread_req,   -- request to read DATAMEM
+        inst_read_addr => inst_addr,    -- instruction read target
+        data_read_addr => data_addr,    -- data read target
+        write_data  => write_data       -- provided data to write to memory: eg. STORE instruciton
     );
 
     mem : memory
@@ -115,7 +123,8 @@ BEGIN
         datamemread => dataread_req,
         instmemread => instread_req,
 
-        readdata    => read_data,
+        readdata    => data_bus,
+        readinst    => instruction_bus,
         waitrequest => wait_request,
 
         memload     => memload,
