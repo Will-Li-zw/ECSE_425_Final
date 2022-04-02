@@ -130,7 +130,7 @@ BEGIN
 		inst_addr_int := to_integer( unsigned(inst_address) );
 		data_addr_int := to_integer( unsigned(data_address) );
 		--This is the actual synthesizable SRAM block
-		IF (clock'event AND clock = '1') THEN
+		IF (clock'event AND clock = '0') THEN
 			-- 1. mem write
 			-- only data memory can be written
 			IF (memwrite = '1') THEN
