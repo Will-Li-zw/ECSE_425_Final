@@ -52,8 +52,8 @@ architecture Behavioral of decode is
     signal imm_16 : std_logic_vector(15 downto 0);
     signal jump_addr_s : std_logic_vector(25 downto 0);
     signal branch_addr_s : std_logic_vector(25 downto 0);
-    signal rs_s : std_logic_vector(reg_adrsize-1 downto 0);
-    signal rt_s : std_logic_vector(reg_adrsize-1 downto 0);
+    signal rs_s : std_logic_vector(4 downto 0);
+    signal rt_s : std_logic_vector(4 downto 0);
     signal ctrl_sigs : std_logic_vector(ctrl_size-1 downto 0);
     signal cur_instruction : std_logic_vector(reg_adrsize-1 downto 0);
     signal last_instruction : std_logic_vector(reg_adrsize-1 downto 0);
@@ -78,9 +78,9 @@ begin
 
     decode_stage : process(clk)
     variable opcode : std_logic_vector(5 downto 0);
-    variable rs : std_logic_vector(reg_adrsize-1 downto 0);
-    variable rt : std_logic_vector(reg_adrsize-1 downto 0);
-    variable rd : std_logic_vector(reg_adrsize-1 downto 0);
+    variable rs : std_logic_vector(4 downto 0);
+    variable rt : std_logic_vector(4 downto 0);
+    variable rd : std_logic_vector(4 downto 0);
     variable shamt : std_logic_vector(4 downto 0);
     variable funct : std_logic_vector(5 downto 0);
     begin
