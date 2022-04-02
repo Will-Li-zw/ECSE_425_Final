@@ -4,7 +4,7 @@ use IEEE.numeric_std.all;
 
 entity register_file is
     port (
-        clk : in std_logic;
+        clk_rf : in std_logic;
         reset : in std_logic;
 
         r_reg1 : in std_logic_vector(4 downto 0);
@@ -28,10 +28,10 @@ architecture arch of register_file is
         r_data1 <= r(to_integer(unsigned(r_reg1)));
         r_data2 <= r(to_integer(unsigned(r_reg2)));
 
-        process(clk, reset)
+        process(clk_rf, reset)
             begin
             -- if there is a rising edge    
-            if rising_edge(clk) then
+            if rising_edge(clk_rf) then
                 if reset = '1' then -- check the reset signal
                     r <= (others=>(others=>'0'));
                 else
