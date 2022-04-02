@@ -10,21 +10,21 @@ END decodeStage_tb;
  
 ARCHITECTURE behavior OF decodeStage_tb IS 
 
-    COMPONENT register_file
-    PORT(
-        clk_rf : in std_logic;
-        reset : in std_logic;
+    -- COMPONENT register_file
+    -- PORT(
+    --     clk_rf : in std_logic;
+    --     reset : in std_logic;
 
-        r_reg1 : in std_logic_vector(4 downto 0);
-        r_reg2 : in std_logic_vector(4 downto 0);
-        w_reg : in std_logic_vector(4 downto 0);
-        w_enable : in std_logic;
-        w_data : in std_logic_vector(31 downto 0);
+    --     r_reg1 : in std_logic_vector(4 downto 0);
+    --     r_reg2 : in std_logic_vector(4 downto 0);
+    --     w_reg : in std_logic_vector(4 downto 0);
+    --     w_enable : in std_logic;
+    --     w_data : in std_logic_vector(31 downto 0);
 
-        r_data1 : out std_logic_vector(31 downto 0);
-        r_data2 : out std_logic_vector(31 downto 0)
-        );
-    END COMPONENT;
+    --     r_data1 : out std_logic_vector(31 downto 0);
+    --     r_data2 : out std_logic_vector(31 downto 0)
+    --     );
+    -- END COMPONENT;
 
     COMPONENT decode_stage
     generic(
@@ -75,12 +75,13 @@ ARCHITECTURE behavior OF decodeStage_tb IS
 
    --Inputs
    signal clk : std_logic;
-
+   signal reset : std_logic;
    signal pc_in : std_logic_vector(31 downto 0);
    signal pc_out : std_logic_vector(31 downto 0);
    signal instruction_in : std_logic_vector (31 downto 0);
 
    signal w_addr : std_logic_vector(4 downto 0);
+   signal w_data : std_logic_vector(31 downto 0);
 
    signal mem_reg : std_logic_vector(4 downto 0);
    signal stall_out : std_logic;
@@ -111,36 +112,22 @@ ARCHITECTURE behavior OF decodeStage_tb IS
 
    -----------------------------register file intermediate---------------------------
    --Inputs
-   signal clk_rf : std_logic := '0';
-   signal reset : std_logic := '0';
+--    signal reset : std_logic := '0';
    signal w_enable : std_logic := '0';
-   signal r_reg1 : std_logic_vector(4 downto 0) := (others => '0');
-   signal r_reg2 : std_logic_vector(4 downto 0) := (others => '0');
-   signal w_reg : std_logic_vector(4 downto 0) := (others => '0');
-   signal w_data : std_logic_vector(31 downto 0) := (others => '0');
+--    signal r_reg1 : std_logic_vector(4 downto 0) := (others => '0');
+--    signal r_reg2 : std_logic_vector(4 downto 0) := (others => '0');
+--    signal w_reg : std_logic_vector(4 downto 0) := (others => '0');
+--    signal w_data : std_logic_vector(31 downto 0) := (others => '0');
 
-   --Outputs
-   signal r_data1 : std_logic_vector(31 downto 0);
-   signal r_data2 : std_logic_vector(31 downto 0);
+--    --Outputs
+--    signal r_data1 : std_logic_vector(31 downto 0);
+--    signal r_data2 : std_logic_vector(31 downto 0);
 
-   -- Clock period definitions
+--    -- Clock period definitions
    constant CLK_period : time := 10 ns;
  
 BEGIN
- 
 
-	-- Instantiate the Unit Under Test (UUT)
-   rf: register_file PORT MAP (
-          clk_rf => clk_rf,
-          reset => reset,
-          w_enable => w_enable,
-          r_reg1 => r_reg1,
-          r_reg2 => r_reg2,
-          w_reg => w_reg,
-          w_data => w_data,
-          r_data1 => r_data1,
-          r_data2 => r_data2
-        );
 	-- Instantiate the Unit Under Test (UUT)
    uut: decode_stage port map (
         clk => clk,
@@ -174,9 +161,9 @@ BEGIN
    -- Clock process definitions
    CLK_process :process
    begin
-        clk_rf <= '0';
+        clk <= '0';
 		wait for CLK_period/2;
-		clk_rf <= '1';
+		clk <= '1';
 		wait for CLK_period/2;
    end process;
  
@@ -187,16 +174,16 @@ BEGIN
     --Test case 1 - 000000 01011 01100 01101 00000 100000   ADD R11,R12,R13
         wait for 1 ns;	
 		w_enable 			<= '1';
-		w_reg		<= "01100";
+		w_addr		<= "01100";
 		w_data 	<= "00000000000000000000000000000100";--random 32bit
 		wait for CLK_period;
 		
         wait for 1 ns;	
 		w_enable 			<= '1';
-		w_reg		<= "01101";
+		w_addr		<= "01101";
 		w_data 	<= "00000000000000000000000000000010";--random 32bit
 		wait for CLK_period;
-		
+		w_enable <='0';
         pc_in <= (others => '0');
         assert pc_out <= "00000000000000000000000000000000" report "Test1: pc_out error" severity error;
         instruction_in <= "00000001011011000110100000100000";
