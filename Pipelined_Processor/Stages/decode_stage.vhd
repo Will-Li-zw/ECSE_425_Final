@@ -104,6 +104,7 @@ begin
             rt_s <= rt;
             rs_addr <= rs;
             rt_addr <= rt;
+            pc_out <= pc_in;
 
             imm_16 <= cur_instruction(15 downto 0);  -- immediate value
             jump_addr_s <= cur_instruction(25 downto 0);
