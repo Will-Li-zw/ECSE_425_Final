@@ -1,10 +1,10 @@
 library IEEE;
-use IEEE.STD_LOGIC_1164.ALL
+use IEEE.STD_LOGIC_1164.ALL;
 library WORK;
 
 entity writebackStage is
     generic(
-        word_width: integer := 32
+        word_width: integer := 32;
         reg_address_width: integer := 5
     );
 
@@ -23,7 +23,7 @@ entity writebackStage is
         -- output signals
         reg_file_enable_out: out std_logic;
         reg_address_out: out std_logic_vector (reg_address_width-1 downto 0);
-        write_data: out std_logic_vector (word_width-1 downto 0);
+        write_data: out std_logic_vector (word_width-1 downto 0)
     );
 end writebackStage;
 
@@ -36,7 +36,7 @@ architecture Behavior of writebackStage is
 		sel : in std_logic;
 		input0 : in std_logic_vector (word_width-1 downto 0);
 		input1 : in std_logic_vector (word_width-1 downto 0);
-		output : out std_logic_vector (word_width-1 downto 0);
+		output : out std_logic_vector (word_width-1 downto 0)
        );
     end component;
 
@@ -45,17 +45,22 @@ begin
         sel => mem_to_reg_flag,
         input0 => alu_result,
         input1 => read_data,
-        output => MUX_output,
+        output => MUX_output
     );
 
-    writeback: process(clock)
+    writeback: process(clock, mem_to_reg_flag)
     begin
-        if rising_edge(clk) then
+        if rising_edge(clock) then
+            -- if mem_to_reg_flag='1' then
+            --     write_data<=read_data;
+            -- else
+            --     write_data<=alu_result;
+            -- end if;
             -- passing control signal 
             reg_file_enable_out <= reg_file_enable_in;
             -- passing data and reg address for update in decode
             reg_address_out <= reg_address_in;
-            write_data <= MUX_output;
+            write_data<=MUX_output;
         end if;
     end process;
 
