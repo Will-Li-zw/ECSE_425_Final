@@ -19,6 +19,11 @@ entity decode is
         w_addr : in std_logic_vector(4 downto 0);
         w_enable : in std_logic;
 
+        mem_reg : in std_logic_vector(4 downto 0);
+        stall_out : out std_logic;
+
+        rs_addr : out std_logic_vector(4 downto 0);
+        rt_addr : out std_logic_vector(4 downto 0);
         rs_data : out std_logic_vector(reg_adrsize-1 downto 0); -- contents of rs
         rt_data : out std_logic_vector(reg_adrsize-1 downto 0); -- contents of rt
         imm_32 : out std_logic_vector(reg_adrsize-1 downto 0);  -- sign extended immediate value
@@ -50,6 +55,9 @@ architecture Behavioral of decode is
     signal rs_s : std_logic_vector(reg_adrsize-1 downto 0);
     signal rt_s : std_logic_vector(reg_adrsize-1 downto 0);
     signal ctrl_sigs : std_logic_vector(ctrl_size-1 downto 0);
+    signal cur_instruction : std_logic_vector(reg_adrsize-1 downto 0);
+    signal last_instruction : std_logic_vector(reg_adrsize-1 downto 0);
+    signal last_stall : std_logic := '0';
 begin
     rf : entity work.register_file
     port map(
@@ -77,21 +85,38 @@ begin
     variable funct : std_logic_vector(5 downto 0);
     begin
         if rising_edge(clk) then
-            opcode := instruction_in(31 downto 26);
-            rs := instruction_in(25 downto 21);
-            rt := instruction_in(20 downto 16);
-            rd := instruction_in(15 downto 11);
-            shamt := instruction_in(10 downto 6);
-            funct := instruction_in(5 downto 0);
+            if last_stall = '1' then
+                cur_instruction <= last_instruction;
+                last_stall <= '0';
+                stall_out <= '0';
+            else
+                cur_instruction <= instruction_in;
+            end if;
+
+            opcode := cur_instruction(31 downto 26);
+            rs := cur_instruction(25 downto 21);
+            rt := cur_instruction(20 downto 16);
+            rd := cur_instruction(15 downto 11);
+            shamt := cur_instruction(10 downto 6);
+            funct := cur_instruction(5 downto 0);
 
             rs_s <= rs;
             rt_s <= rt;
+            rs_addr <= rs;
+            rt_addr <= rt;
 
-            imm_16 <= instruction_in(15 downto 0);  -- immediate value
-            jump_addr_s <= instruction_in(25 downto 0);
-            branch_addr_s <= instruction_in(25 downto 0);
+            imm_16 <= cur_instruction(15 downto 0);  -- immediate value
+            jump_addr_s <= cur_instruction(25 downto 0);
+            branch_addr_s <= cur_instruction(25 downto 0);
 
-            if opcode = "000000" then
+            -------------------- R-instruction--------------------
+            if opcode = "000000" then   
+                -- hazard detection
+                if mem_reg = rs_s or mem_reg = rt_s then
+                    stall_out <= '1';
+                    last_stall <= '1';
+                    funct := "111111";
+                end if;
                 case(funct) is 
                     when "100000" => alu_op <= 0;         -- 0. add
                     when "100010" => alu_op <= 1;         -- 1. substract
@@ -110,45 +135,9 @@ begin
                     when "001000" => alu_op <= 25;        -- 25. jr
                     when others => alu_op <= 27;
                 end case;
-                ctrl_sigs <= "11000000";
-            elsif opcode = "001000" then  -- 2. addi
-                alu_op <= 2;
-                imm_32 <= std_logic_vector(resize(signed(imm_16), imm_32'length));
-                ctrl_sigs <= "10000000";   
-            elsif opcode = "001010" then  -- 6. slti
-                alu_op <= 6;
-                imm_32 <= std_logic_vector(resize(signed(imm_16), imm_32'length));
-                ctrl_sigs <= "10000000";
-            elsif opcode = "001100" then  -- 11. andi
-                alu_op <= 11;
-                imm_32 <= std_logic_vector(resize(signed(imm_16), imm_32'length));
-                ctrl_sigs <= "10000000";  
-            elsif opcode = "001101" then  -- 12. ori
-                alu_op <= 12;
-                imm_32 <= std_logic_vector(resize(signed(imm_16), imm_32'length));
-                ctrl_sigs <= "10000000";
-            elsif opcode = "001110" then  -- 13. xori
-                alu_op <= 13;
-                imm_32 <= std_logic_vector(resize(signed(imm_16), imm_32'length));
-                ctrl_sigs <= "10000000";  
-            elsif opcode = "001111" then  -- 16. lui
-                alu_op <= 16;
-                imm_32 <= std_logic_vector(resize(signed(imm_16), imm_32'length));
-                ctrl_sigs <= "10100000"; 
-            elsif opcode = "100011" then  -- 20. lw
-                alu_op <= 20;   
-                ctrl_sigs <= "10000101";
-            elsif opcode = "101011" then  -- 21. sw
-                alu_op <= 21;    
-                ctrl_sigs <= "00000011";
-            elsif opcode = "000100" then  -- 22. beq
-                alu_op <= 22;
-                branch_addr <= std_logic_vector(resize(unsigned(branch_addr_s), branch_addr'length));
-                ctrl_sigs <= "00001000";
-            elsif opcode = "000101" then  -- 23. bne
-                alu_op <= 23;
-                branch_addr <= std_logic_vector(resize(unsigned(branch_addr_s), branch_addr'length));
-                ctrl_sigs <= "00001000";  
+                ctrl_sigs <= "11000001";
+                
+            -------------------- J-instruction--------------------
             elsif opcode = "000010" then  -- 24. j
                 alu_op <= 24;
                 jump_addr <= std_logic_vector(resize(unsigned(jump_addr_s), jump_addr'length));
@@ -156,8 +145,55 @@ begin
             elsif opcode = "000011" then  -- 26. jal
                 alu_op <= 26;   
                 jump_addr <= std_logic_vector(resize(unsigned(jump_addr_s), jump_addr'length));
-                ctrl_sigs <= "00000100";      
-            else ctrl_sigs <= "00000000";
+                ctrl_sigs <= "00000100";
+                
+            -------------------- I-instruction--------------------
+            else
+                if mem_reg = rs_s then
+                    stall_out <= '1';
+                    last_stall <= '1';
+                end if;
+
+                if opcode = "001000" then  -- 2. addi
+                    alu_op <= 2;
+                    imm_32 <= std_logic_vector(resize(signed(imm_16), imm_32'length));
+                    ctrl_sigs <= "10000001";   
+                elsif opcode = "001010" then  -- 6. slti
+                    alu_op <= 6;
+                    imm_32 <= std_logic_vector(resize(signed(imm_16), imm_32'length));
+                    ctrl_sigs <= "10000001";
+                elsif opcode = "001100" then  -- 11. andi
+                    alu_op <= 11;
+                    imm_32 <= std_logic_vector(resize(signed(imm_16), imm_32'length));
+                    ctrl_sigs <= "10000001";  
+                elsif opcode = "001101" then  -- 12. ori
+                    alu_op <= 12;
+                    imm_32 <= std_logic_vector(resize(signed(imm_16), imm_32'length));
+                    ctrl_sigs <= "10000001";
+                elsif opcode = "001110" then  -- 13. xori
+                    alu_op <= 13;
+                    imm_32 <= std_logic_vector(resize(signed(imm_16), imm_32'length));
+                    ctrl_sigs <= "10000001";  
+                elsif opcode = "001111" then  -- 16. lui
+                    alu_op <= 16;
+                    imm_32 <= std_logic_vector(resize(signed(imm_16), imm_32'length));
+                    ctrl_sigs <= "10000001"; 
+                elsif opcode = "100011" then  -- 20. lw
+                    alu_op <= 20;   
+                    ctrl_sigs <= "10000101";
+                elsif opcode = "101011" then  -- 21. sw
+                    alu_op <= 21;    
+                    ctrl_sigs <= "00000011";
+                elsif opcode = "000100" then  -- 22. beq
+                    alu_op <= 22;
+                    branch_addr <= std_logic_vector(resize(unsigned(branch_addr_s), branch_addr'length));
+                    ctrl_sigs <= "00001000";
+                elsif opcode = "000101" then  -- 23. bne
+                    alu_op <= 23;
+                    branch_addr <= std_logic_vector(resize(unsigned(branch_addr_s), branch_addr'length));
+                    ctrl_sigs <= "00001000";
+                else ctrl_sigs <= "00000000";
+                end if;  
             end if;
 
             -- Control signal output
@@ -170,7 +206,7 @@ begin
             mem_write <= ctrl_sigs(1);
             alu_src <= ctrl_sigs(0); -- select the second ALU input from either rt or sign-extended immediate
 
+            last_instruction <= cur_instruction;
         end if;
     end process;
 end Behavioral;
-
