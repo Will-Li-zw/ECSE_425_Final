@@ -10,7 +10,7 @@ architecture behavior of writebackStage_tb is
 
 component writebackStage is
 generic(
-    word_width: integer := 32
+    word_width: integer := 32;
     reg_address_width: integer := 5 
 );
 
@@ -25,7 +25,7 @@ port(
 
     reg_file_enable_out: out std_logic;
     reg_address_out: out std_logic_vector (reg_address_width-1 downto 0);
-    write_data: out std_logic_vector (word_width-1 downto 0);
+    write_data: out std_logic_vector (word_width-1 downto 0)
 );
 end component;
 
@@ -39,8 +39,8 @@ signal mem_to_reg_flag : std_logic;
 signal reg_file_enable_in : std_logic;
 
 signal reg_file_enable_out : std_logic;
-signal reg_address_out: std_logic_vector (reg_address_width-1 downto 0);
-signal write_data: std_logic_vector (word_width-1 downto 0);
+signal reg_address_out: std_logic_vector (5-1 downto 0);
+signal write_data: std_logic_vector (32-1 downto 0);
 
 begin
     writeback: writebackStage port map(
@@ -54,7 +54,7 @@ begin
 
         reg_file_enable_out => reg_file_enable_out,
         reg_address_out => reg_address_out,
-        write_data => write_data,
+        write_data => write_data
     );
 
     clk_process : process  
@@ -75,31 +75,33 @@ begin
         reg_address_in <= "00000";
 
         mem_to_reg_flag <= '0';
-        alu_result <= x"01";
-        m_read_data <= x"02";
+        alu_result <= x"00000001";
+        m_read_data <= x"00000002";
 
-        wait until rising_edge(clock);
+        wait until rising_edge(clk);
+        wait for 0.1 ns;
 
-        assert reg_file_enable_out = '0' report "Test 1: Error, enable value not expected"
-        assert reg_address_out = "00000" report "Test 1: Error, register address not expected"
-        assert write_data = x"01" report "Test 1: Error, write data not expected"
+        assert reg_file_enable_out = '0' report "Test 1: Error, enable value not expected" severity error;
+        assert reg_address_out = "00000" report "Test 1: Error, register address not expected" severity error;
+        assert write_data = x"00000001" report "Test 1: Error, write data not expected" severity error;
 
         wait for clk_period;
 
         report "Test2: write back from MEM result";
 
-        reg_file_enable_in <= '1;
+        reg_file_enable_in <= '1';
         reg_address_in <= "11111";
 
-        mem_to_reg_flag <= '0';
-        alu_result <= x"01";
-        m_read_data <= x"02";
+        mem_to_reg_flag <= '1';
+        alu_result <= x"00000001";
+        m_read_data <= x"00000002";
 
-        wait until rising_edge(clock);
+        wait until rising_edge(clk);
+        wait for 0.1 ns;
 
-        assert reg_file_enable_out = '1' report "Test 1: Error, enable value not expected"
-        assert reg_address_out = "11111" report "Test 1: Error, register address not expected"
-        assert write_data = x"02" report "Test 1: Error, write data not expected"
+        assert reg_file_enable_out = '1' report "Test 2: Error, enable value not expected" severity error;
+        assert reg_address_out = "11111" report "Test 2: Error, register address not expected" severity error;
+        assert write_data = x"00000002" report "Test 2: Error, write data not expected" severity error;
     
         wait;
     
