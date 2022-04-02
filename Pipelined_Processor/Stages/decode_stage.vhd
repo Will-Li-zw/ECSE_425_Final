@@ -5,7 +5,7 @@ use IEEE.numeric_std.all;
 entity decode_stage is
     generic(
         reg_adrsize : INTEGER := 32;
-        ctrl_size : INTEGER := 7
+        ctrl_size : INTEGER := 8
     );
     port (
         clk : in std_logic;
