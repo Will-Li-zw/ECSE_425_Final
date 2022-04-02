@@ -2,7 +2,7 @@ library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
 
-entity decode is
+entity decode_stage is
     generic(
         reg_adrsize : INTEGER := 32;
         ctrl_size : INTEGER := 7
@@ -48,7 +48,7 @@ entity decode is
     );
 end entity;
 
-architecture Behavioral of decode is
+architecture Behavioral of decode_stage is
     signal imm_16 : std_logic_vector(15 downto 0);
     signal jump_addr_s : std_logic_vector(25 downto 0);
     signal branch_addr_s : std_logic_vector(25 downto 0);
