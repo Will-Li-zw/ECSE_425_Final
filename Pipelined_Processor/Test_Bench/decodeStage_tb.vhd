@@ -29,7 +29,7 @@ ARCHITECTURE behavior OF decodeStage_tb IS
     COMPONENT decode_stage
     generic(
         reg_adrsize : INTEGER := 32;
-        ctrl_size : INTEGER := 7
+        ctrl_size : INTEGER := 8
     );
     PORT(
         clk : in std_logic;
@@ -75,7 +75,7 @@ ARCHITECTURE behavior OF decodeStage_tb IS
 
    --Inputs
    signal clk : std_logic;
-   signal reset : std_logic;
+   signal reset : std_logic:='0';
    signal pc_in : std_logic_vector(31 downto 0);
    signal pc_out : std_logic_vector(31 downto 0);
    signal instruction_in : std_logic_vector (31 downto 0);
