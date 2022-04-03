@@ -1,12 +1,16 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
+use ieee.numeric_std.all;
 
 ENTITY ALU IS
 	PORT(
 			data1 : IN SIGNED(31 DOWNTO 0);
 			op2 : IN SIGNED (31 DOWNTO 0); -- output from a 2MUX (either data2 or instruct(15 downto 0))
 			ALUcontrol : IN INTEGER range 0 to 26; --sequential encoding based on page 2 of the pdf
+
 			ALUresult : OUT SIGNED(31 DOWNTO 0);
+            hi : OUT SIGNED(31 DOWNTO 0);
+			lo : OUT SIGNED(31 DOWNTO 0);
 			zero : OUT STD_LOGIC
        );
 END ALU;
@@ -32,12 +36,13 @@ BEGIN
 			WHEN 3 => -- mult
 				report "The value of 'ALUcontrol' is " & integer'image(ALUcontrol);
 				temp_ALUresult <= to_integer(signed(data1)) * to_integer(signed(op2));
-				ALU_result <= temp_ALUresult(31 downto 0);
+				hi <= temp_ALUresult(63 downto 32);
+				lo <= temp_ALUresult(31 downto 0);
                 
 			WHEN 4 => -- div
 				report "The value of 'ALUcontrol' is " & integer'image(ALUcontrol);
-				temp_ALUresult <= to_integer(signed(data1)) / to_integer(signed(op2));
-				ALU_result <= temp_ALUresult(31 downto 0);
+				lo <= to_integer(signed(data1)) / to_integer(signed(op2));
+				hi <= to_integer(signed(data1)) mod to_integer(signed(op2));
 				
 			WHEN 5 | 6 => -- slt, slti
 				report "The value of 'ALUcontrol' is " & integer'image(ALUcontrol);
@@ -84,38 +89,49 @@ BEGIN
 			WHEN 18 => -- srl
 				report "The value of 'ALUcontrol' is " & integer'image(ALUcontrol);
                 ALU_result <= shift_right(to_unsigned(data1), to_integer(op2));
+                
 			WHEN 19 => -- sra
 				report "The value of 'ALUcontrol' is " & integer'image(ALUcontrol);
                 ALU_result <= shift_right(data1, to_integer(op2));
+                
 			WHEN 20 => -- lw (load word)
 				report "The value of 'ALUcontrol' is " & integer'image(ALUcontrol);
                 null;
+                
 			WHEN 21 => -- sw (store word)
 				report "The value of 'ALUcontrol' is " & integer'image(ALUcontrol);
                 ALU_result <= op2; -- pass the word to be stored to memeory stage
+                
 			WHEN 22 => -- beq (Adder computes new relative PC address(TODO), ALU determines if equal)
 				report "The value of 'ALUcontrol' is " & integer'image(ALUcontrol);
 				-- TODO: Same as sub?
 				temp_ALUresult <= to_integer(signed(data1)) - to_integer(signed(op2));
 				ALU_result <= temp_ALUresult(31 downto 0);
+                
 			WHEN 23 => -- bne
 				report "The value of 'ALUcontrol' is " & integer'image(ALUcontrol);
                 -- TODO: Same as sub?
 				temp_ALUresult <= to_integer(signed(data1)) - to_integer(signed(op2));
 				ALU_result <= temp_ALUresult(31 downto 0);
+                
 			WHEN 24 => -- j (taken cared in decode)
 				report "The value of 'ALUcontrol' is " & integer'image(ALUcontrol);
                 null;
+                
 			WHEN 25 => -- jr (taken cared in decode)
 				report "The value of 'ALUcontrol' is " & integer'image(ALUcontrol);
                 null;
+                
 			WHEN 26 => -- jal (taken cared in decode)
 				report "The value of 'ALUcontrol' is " & integer'image(ALUcontrol);
                 null;
+                
 			WHEN others =>
-				report "The value of 'ALUcontrol' is " & integer'image(ALUcontrol) & "(out of range)";
+				-- NO-OP or STALL
                 null;
+                
 		END CASE;
+        -- in case of stall, the following "if" block should not change "zero" output because ALU_reuslt didn't change
 		if ALU_result = (others => '0') then
 			zero <= '1';
         else
@@ -123,4 +139,5 @@ BEGIN
 		END if;
 	END process;
 END arith;
+
 
