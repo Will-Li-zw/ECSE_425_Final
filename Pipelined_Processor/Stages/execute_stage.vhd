@@ -3,7 +3,7 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all; -- needed if you are using unsigned rotate operations
 
 -- TOP LEVEL ENTITY FOR EXECUTE STAGE
-entity EXECUTE is
+entity execute_stage is
 	port(
         -- inputs --
         clk : in std_logic;
@@ -42,9 +42,9 @@ entity EXECUTE is
         mem_write_request_out : out std_logic;
         meme_read_request_out : out std_logic
 	);
-end EXECUTE;
+end execute_stage;
 
-ARCHITECTURE exe OF EXECUTE IS
+ARCHITECTURE exe OF execute_stage IS
 
 SIGNAL muxout: signed(31 downto 0);
 

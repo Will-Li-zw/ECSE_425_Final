@@ -2,7 +2,7 @@ library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
 
-entity fetchStage is
+entity fetch_stage is
     generic(
         inst_ram_size: integer := 4096; --instruction memory size is 4096 bytes
         bit_width: integer := 32
@@ -20,9 +20,9 @@ entity fetchStage is
         pc          : out std_logic_vector (bit_width-1 downto 0) := (others => '0');  -- all initalize to 0s
         pc_next     : out std_logic_vector (bit_width-1 downto 0) := (others => '0')
     );
-end fetchStage;
+end fetch_stage;
 
-architecture arch of fetchStage is
+architecture arch of fetch_stage is
     -- set to integer will make our calculation easier
     signal pc_register      : integer := 0;
     signal pc_next_register : integer := 0;

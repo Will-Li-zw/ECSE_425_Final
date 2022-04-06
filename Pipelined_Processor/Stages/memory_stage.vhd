@@ -1,7 +1,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
-entity memoryStage is
+entity memory_stage is
     generic(
         word_width: integer := 32
         reg_addr_width: integer := 5
@@ -31,11 +31,11 @@ entity memoryStage is
         reg_file_enable_out: out std_logic;
         mem_to_reg_flag_out: out std_logic;
         mem_write_request_out: out std_logic;
-        mem_read_request_out: out std_logic;
+        mem_read_request_out: out std_logic
     );
-end memoryStage;
+end memory_stage;
 
-architecture Behavior of memoryStage is
+architecture Behavior of memory_stage is
 
     memory: process(clock)
     begin

@@ -2,7 +2,7 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 library WORK;
 
-entity writebackStage is
+entity writeback_stage is
     generic(
         word_width: integer := 32;
         reg_address_width: integer := 5
@@ -25,9 +25,9 @@ entity writebackStage is
         reg_address_out: out std_logic_vector (reg_address_width-1 downto 0);
         write_data: out std_logic_vector (word_width-1 downto 0)
     );
-end writebackStage;
+end writeback_stage;
 
-architecture Behavior of writebackStage is
+architecture Behavior of writeback_stage is
 
     signal MUX_output: std_logic_vector(word_width-1 downto 0);
 
