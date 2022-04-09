@@ -39,14 +39,13 @@ BEGIN
 			WHEN 3 => -- mult
 				report "The value of 'ALUcontrol' is " & integer'image(ALUcontrol);
 				-- temp_ALUresult <= data1 * op2;
-				lo <= data1(15 downto 0) * op2(15 downto 0);	 -- NOTE: 32 bits multiplication can be divided into two parts: 16bits x 16bits
-				hi <= data1(31 downto 16) * op2(31 downto 16);
-				
+				-- TODO: That's probably not correct
+				temp_ALUresult <= data1 * op2;	 -- NOTE: 32 bits multiplication can be divided into two parts: 16bits x 16bits	
                 
 			WHEN 4 => -- div
 				report "The value of 'ALUcontrol' is " & integer'image(ALUcontrol);
-				lo <= data1 / op2;
-				hi <= data1 mod op2;
+				temp_ALUresult(31 downto 0) <= data1 / op2;
+				temp_ALUresult(63 downto 32) <= data1 mod op2;
 				
 			WHEN 5 | 6 => -- slt, slti
 				report "The value of 'ALUcontrol' is " & integer'image(ALUcontrol);
@@ -155,8 +154,8 @@ BEGIN
 	-- signal connect to output
 	ALUresult <= ALUresult_buffer;
 
-	-- lo <= lo_buffer;
-	-- hi <= hi_buffer;
+	lo <= temp_ALUresult(31 downto 0);
+	hi <= temp_ALUresult(63 downto 32);
 END arith;
 
 
