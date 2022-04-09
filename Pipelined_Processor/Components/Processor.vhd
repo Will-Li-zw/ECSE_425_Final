@@ -32,7 +32,7 @@ end Processor;
 
 architecture behavior of Processor is 
 	-- components declaration
-	component fetchStage is 
+	component fetch_stage is 
 	generic(
         inst_ram_size: integer := 4096; --instruction memory size is 4096 bytes
         bit_width: integer := 32
@@ -87,7 +87,7 @@ architecture behavior of Processor is
 
 begin
 	-- 连连看:
-	fetcher : fetchStage 
+	fetcher : fetch_stage 
 	port map(
       clock          => clock,		-- processor clock
       reset          => reset,		-- processor reset
