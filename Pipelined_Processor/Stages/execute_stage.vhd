@@ -50,7 +50,7 @@ ARCHITECTURE exe OF execute_stage IS
 SIGNAL muxout: signed(31 downto 0);
 
 -- output intermediate buffer registers to make the circuit synchronous
-SIGNAL reg_address_buffer : std_logic_vector(5 downto 0);
+SIGNAL reg_address_buffer : std_logic_vector(4 downto 0);
 SIGNAL read_data_2_out_buffer : signed(31 downto 0);
 SIGNAL pc_plus_4_out_buffer : std_logic_vector(31 downto 0);
 SIGNAL Addresult_buffer : signed(31 downto 0);
