@@ -19,10 +19,10 @@ ARCHITECTURE arith OF ALU IS
 
 Signal temp_ALUresult : signed(63 downto 0); -- prevent overflow
 
-Signal ALUresult_buffer	: signed(31 downto 0); -- buffer for output
+Signal ALUresult_buffer	: signed(31 downto 0) := (others => '0'); -- buffer for output
 
 BEGIN
-	process 
+	ALU_unit : process(ALUcontrol, data1, op2)
 	BEGIN
 		CASE ALUcontrol IS
 			WHEN 0 | 2 => -- add, addi

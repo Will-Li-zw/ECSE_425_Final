@@ -75,7 +75,7 @@ begin
 
         wait for clk_period;
 
-        finish;
+        -- finish;
 
         
 

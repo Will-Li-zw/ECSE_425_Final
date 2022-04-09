@@ -54,31 +54,86 @@ end component;
 signal clk : std_logic := '0';
 constant clk_period : time := 1 ns;
 
+-----------------
+-- * inputs * --
+-----------------
+signal read_data_1 : signed(31 downto 0) := (others => '0');       -- register data 1
+signal read_data_2 : signed(31 downto 0) := (others => '0');       -- register data 2
+signal ALUcontrol : integer range 0 to 26;
+signal extended_lower_15_bits : signed(31 downto 0) := (others => '0'); -- lower 16 bits (sign/zero extended to 32) passed in
+signal pc_plus_4 : std_logic_vector(31 downto 0) := (others => '0');
 
+-- reg address
+signal rt : std_logic_vector(4 downto 0) := (others => '0'); 
+signal rs : std_logic_vector(4 downto 0) := (others => '0'); -- may not need
+signal rd : std_logic_vector(4 downto 0) := (others => '0');
+
+-- control inputs:
+signal twomux_sel : std_logic            := '0'; -- choose read data 2 or immediate
+signal reg_file_enable_in : std_logic    := '0';
+signal mem_to_reg_flag_in : std_logic    := '0';
+signal mem_write_request_in : std_logic  := '0';
+signal meme_read_request_in : std_logic  := '0';
+
+-----------------
+-- * outputs * --
+-----------------
+signal reg_address : std_logic_vector(4 downto 0);
+-- register to be written (WB), for R type instrustion (reg_address = rd)
+-- register to be loaded by memory data (MEM LW), for I type instrustion (reg_address = rt)
+signal read_data_2_out : signed(31 downto 0); -- write_data for Mem
+signal pc_plus_4_out : std_logic_vector(31 downto 0);
+signal Addresult : signed(31 downto 0);
+signal zero : std_logic;
+signal ALUresult : signed(31 downto 0);
+signal hi : signed(31 downto 0);
+signal lo : signed(31 downto 0);
+-- control outputs (TODO: may not be complete)
+signal reg_file_enable_out : std_logic;
+signal mem_to_reg_flag_out : std_logic;
+signal mem_write_request_out : std_logic;
+signal meme_read_request_out : std_logic;
 
 begin
 
     -- Connect the components which we instantiated above to their
     -- respective signals.
 
-    dut : memory
+    cut : execute_stage
     port map (
-        clock => clk,
-        writedata => m_writedata,
-        memwrite => m_write,
+        clk         => clk,
+		read_data_1 => read_data_1,
+        read_data_2 => read_data_2,
+        ALUcontrol  => ALUcontrol,
+        extended_lower_15_bits => extended_lower_15_bits,
+        pc_plus_4   => pc_plus_4,
         
-        inst_address => i_addr,
-        data_address => d_addr,
-
-        datamemread => d_read,
-        instmemread => i_read,
-
-        readdata => m_readdata,
-        readinst => m_readinst,
-        waitrequest => m_waitrequest,
-
-        memload => m_load,
-        memoutput => m_output
+        -- reg address
+        rt => rt,
+        rs => rs,
+        rd => rd,
+        
+        -- control inputs:
+		twomux_sel              => twomux_sel,
+		reg_file_enable_in      => reg_file_enable_in,
+        mem_to_reg_flag_in      => mem_to_reg_flag_in,
+        mem_write_request_in    => mem_write_request_in,
+        meme_read_request_in    => meme_read_request_in,
+        
+        -- outputs --
+        reg_address => reg_address,
+        read_data_2_out => read_data_2_out,
+		pc_plus_4_out   => pc_plus_4_out,
+        Addresult       => Addresult,
+        zero            => zero,
+		ALUresult       => ALUresult,
+        hi => hi,
+        lo => lo,
+        -- control outputs (TODO: may not be complete)
+        reg_file_enable_out     => reg_file_enable_out,
+        mem_to_reg_flag_out     => mem_to_reg_flag_out,
+        mem_write_request_out   => mem_write_request_out,
+        meme_read_request_out   => meme_read_request_out
     );
                     
     -- clock loop
@@ -95,80 +150,27 @@ begin
     begin
         
         wait for clk_period;
-        
-        m_load <= '1';
-        wait for clk_period;
-        m_load <= '0';
+        -----------------------------------
+        -- * TEST CODE START FROM HERE * --
+        -----------------------------------
+        report "Test1: Test 1+2 = 3";
+        -- input1 <= x"00000001";
+        -- input2 <= x"00000002";
+        -- ALU_ctl<= 0;
+        -- wait until rising_edge(clk);    
+        -- assert ALU_res = x"00000003" report "Test1: Failed, ALU output not correct" severity error;
+
+        read_data_1 <= x"00000001";
+        read_data_2 <= x"00000002";
+        ALUcontrol  <= 0;
+        twomux_sel  <= '0';
+        -- ALUcontrol  <= 2;
+        wait for clk_period;   -- wait after the rising edge
+        assert ALUresult = x"00000003" report "Test1: Failed, ALU output not correct" severity error;
+
+        report "Test2: Test 1+2 = 3";
 
         wait for clk_period;
-        wait for clk_period/2;
-
-        -- try to read the instruction
-        report "Test1: instruction memory read";
-        i_addr <= x"00000000";
-        i_read <= '1';
-        wait until rising_edge(m_waitrequest);
-        assert m_readinst = x"200B07D0" report "Test1: Failed, read instruction unsuccessful" severity error;
-        i_read <= '0';
-
-        wait for clk_period*1.5;
-
-        -- try to read the instruction
-        report "Test1-2: instruction memory read";
-        i_addr <= x"00000004";
-        i_read <= '1';
-        wait until rising_edge(m_waitrequest);
-        assert m_readinst = x"200F0004" report "Test1-2: Failed, read instruction unsuccessful" severity error;
-        i_read <= '0';
-
-        wait for clk_period*1.5;
-        
-        -- try to write the data memory
-        report "Test2: data memory write";
-        d_addr <= x"00000004";
-        m_write <= '1';
-        m_writedata <= x"100B0004";
-        wait until rising_edge(m_waitrequest);
-        m_write <= '0';
-        d_addr <= x"00000004";    -- initiate a data read
-        d_read <= '1';
-        wait until rising_edge(m_waitrequest);
-        -- wait for 0.1 ns;    -- solely for passing the test, 
-        assert m_readdata = x"100B0004" report "Test2: Failed, write data unsuccessful" severity error; -- this passes the test actually. ignore
-        d_read <= '0';
-
-        wait for clk_period;  
-
-        report "Test3: data memory I/O";
-        m_output <= '1';
-        wait for clk_period;
-        m_output <= '0';
-
-
-        -- try to read the instruction and memory at same time
-        report "Test4: instruction+data memory read";
-        i_addr <= x"00000004";
-        i_read <= '1';
-        d_addr <= x"00000000";    -- initiate a data read
-        d_read <= '1';
-        wait until rising_edge(m_waitrequest);
-        assert m_readinst = x"200F0004" report "Test4-1: Failed, read instruction unsuccessful" severity error;
-        assert m_readdata = x"00000000" report "Test4-2: Failed, write data unsuccessful" severity error; 
-        i_read <= '0';
-        d_read <= '0';
-        wait for clk_period/2;
-            
-        -- try to read the instruction and write memory at same time
-        report "Test5: instruction memory read + data write";
-        i_addr <= x"00000008";
-        i_read <= '1';
-        d_addr <= x"00000008";
-        m_write <= '1';
-        m_writedata <= x"0C0B0A09";
-        wait until rising_edge(m_waitrequest);
-        assert m_readinst = x"20010003" report "Test5: Failed, read instruction unsuccessful" severity error;
-        i_read <= '0';
-        m_write <= '0';
 
         wait;
 
