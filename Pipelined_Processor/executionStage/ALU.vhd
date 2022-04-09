@@ -17,10 +17,11 @@ END ALU;
 
 ARCHITECTURE arith OF ALU IS
 
-Signal temp_ALUresult : signed(63 downto 0); -- prevent overflow
-
+Signal temp_ALUresult : signed(63 downto 0) := (others => '0'); -- prevent overflow
 Signal ALUresult_buffer	: signed(31 downto 0) := (others => '0'); -- buffer for output
 
+-- signal lo_buffer : SIGNED(31 DOWNTO 0);
+-- signal hi_buffer : SIGNED(31 DOWNTO 0);
 BEGIN
 	ALU_unit : process(ALUcontrol, data1, op2)
 	BEGIN
@@ -29,18 +30,18 @@ BEGIN
 				report "The value of 'ALUcontrol' is " & integer'image(ALUcontrol);
 				ALUresult_buffer <= data1 + op2;
 				-- ALUresult_buffer <= temp_ALUresult(31 downto 0); -- keep lower 32 bits
-			
 				
+
 			WHEN 1 => -- sub
 				report "The value of 'ALUcontrol' is " & integer'image(ALUcontrol);
-				temp_ALUresult <= data1 - op2;
-				ALUresult_buffer <= temp_ALUresult(31 downto 0);
+				ALUresult_buffer <= data1 - op2;
 				
 			WHEN 3 => -- mult
 				report "The value of 'ALUcontrol' is " & integer'image(ALUcontrol);
-				temp_ALUresult <= data1 * op2;
-				hi <= temp_ALUresult(63 downto 32);
-				lo <= temp_ALUresult(31 downto 0);
+				-- temp_ALUresult <= data1 * op2;
+				lo <= data1(15 downto 0) * op2(15 downto 0);	 -- NOTE: 32 bits multiplication can be divided into two parts: 16bits x 16bits
+				hi <= data1(31 downto 16) * op2(31 downto 16);
+				
                 
 			WHEN 4 => -- div
 				report "The value of 'ALUcontrol' is " & integer'image(ALUcontrol);
@@ -108,14 +109,12 @@ BEGIN
 			WHEN 22 => -- beq (Adder computes new relative PC address(TODO), ALU determines if equal)
 				report "The value of 'ALUcontrol' is " & integer'image(ALUcontrol);
 				-- TODO: Same as sub?
-				temp_ALUresult <= data1 - op2;
-				ALUresult_buffer <= temp_ALUresult(31 downto 0);
+				ALUresult_buffer <= data1 - op2;
                 
 			WHEN 23 => -- bne
 				report "The value of 'ALUcontrol' is " & integer'image(ALUcontrol);
                 -- TODO: Same as sub?
-				temp_ALUresult <= data1 - op2;
-				ALUresult_buffer <= temp_ALUresult(31 downto 0);
+				ALUresult_buffer <= data1 - op2;
                 
 			WHEN 24 => -- j (taken cared in decode)
 				report "The value of 'ALUcontrol' is " & integer'image(ALUcontrol);
@@ -135,15 +134,29 @@ BEGIN
                 
 		END CASE;
         -- in case of stall, the following "if" block should not change "zero" output because ALU_reuslt didn't change
-		-- TODO: cannot read the output signal
+		-- TODO: Still problematic in the same process!
 		if ALUresult_buffer = x"00000000" then
 			zero <= '1';
         else
         	zero <= '0';
-		END if;
+		END if;	
 	END process;
 
+	-- CAN't USE MULTIPLE PROCESS BLOCK TO DRIVE SAME OUTPUT!!!!
+
+	-- multiplication_buffer_process : process(multiplication_buffer, ALUcontrol)
+	-- begin
+	-- 	if ALUcontrol = 3 then
+	-- 		lo_buffer <= multiplication_buffer(31 downto 0);
+	-- 		hi_buffer <= multiplication_buffer(63 downto 32);
+	-- 	end if;
+	-- end process;
+
+	-- signal connect to output
 	ALUresult <= ALUresult_buffer;
+
+	-- lo <= lo_buffer;
+	-- hi <= hi_buffer;
 END arith;
 
 
