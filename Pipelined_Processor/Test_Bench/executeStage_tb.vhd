@@ -28,7 +28,7 @@ component execute_stage is
 		reg_file_enable_in : in std_logic;
         mem_to_reg_flag_in : in std_logic;
         mem_write_request_in : in std_logic;
-        meme_read_request_in : in std_logic;
+        mem_read_request_in : in std_logic;
         
         -- outputs --
         reg_address : out std_logic_vector(4 downto 0);

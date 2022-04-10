@@ -5,17 +5,19 @@ use ieee.numeric_std.all; -- needed if you are using unsigned rotate operations
 -- TOP LEVEL ENTITY FOR EXECUTE STAGE
 entity execute_stage is
 	port(
-        -- inputs --
+        --------------
+        -- *inputs* --
+        --------------
         clk : in std_logic;
 		read_data_1 : in signed(31 downto 0);       -- register data 1
         read_data_2 : in signed(31 downto 0);       -- register data 2
-        ALUcontrol : in integer range 0 to 26;
+        ALUcontrol : in integer range 0 to 26;      -- interpreted op code from DECODE->EXE
         extended_lower_15_bits : in signed(31 downto 0); -- lower 16 bits (sign/zero extended to 32) passed in
-        pc_plus_4 : in std_logic_vector(31 downto 0);
+        pc_plus_4 : in std_logic_vector(31 downto 0);   -- carried pc_next value from FET->DEC->EXE->...
         
         -- reg address
         rt : in std_logic_vector(4 downto 0); 
-        rs : in std_logic_vector(4 downto 0); -- may not need
+        rs : in std_logic_vector(4 downto 0); -- TODO: may not need??
         rd : in std_logic_vector(4 downto 0);
         
         -- control inputs:
@@ -23,9 +25,23 @@ entity execute_stage is
 		reg_file_enable_in : in std_logic;
         mem_to_reg_flag_in : in std_logic;
         mem_write_request_in : in std_logic;
-        meme_read_request_in : in std_logic;
+        mem_read_request_in : in std_logic;
+
+        -- forwarding inputs:
+        mem_exe_reg_data    : in signed(31 downto 0);                       -- account for MEM->EXE forwarding
+        mem_exe_reg_addr    : in std_logic_vector(4 downto 0); 
+        forwarded_exe_exe_reg_data    : in signed(31 downto 0);             -- account for EXE->EXE forwarding
+        forwarded_exe_exe_reg_addr    : in std_logic_vector(4 downto 0); 
         
-        -- outputs --
+       
+        
+        ---------------
+        -- *outputs* --
+        ---------------
+        -- forwarding outputs:
+        forwarding_exe_exe_reg_data    : out signed(31 downto 0);           -- output forwarding to next CC EXE
+        forwarding_exe_exe_reg_addr    : out std_logic_vector(4 downto 0); 
+
         reg_address : out std_logic_vector(4 downto 0);
         -- register to be written (WB), for R type instrustion (reg_address = rd)
 		-- register to be loaded by memory data (MEM LW), for I type instrustion (reg_address = rt)
@@ -106,7 +122,7 @@ BEGIN
 	);
 
 	cmpnt_alu: ALU port map(
-		data1 => read_data_1,
+		data1 => read_data_1,      -- TODO: For implementing forwarding, we need to change the port mapped data
         op2 => muxout,
         ALUcontrol => ALUcontrol,
         ALUresult => ALUresult_buffer,
