@@ -124,7 +124,7 @@ ARCHITECTURE behavior OF decodeStage_tb IS
 --    signal r_data2 : std_logic_vector(31 downto 0);
 
 --    -- Clock period definitions
-   constant CLK_period : time := 10 ns;
+   constant CLK_period : time := 1 ns;
  
 BEGIN
 
@@ -172,6 +172,7 @@ BEGIN
    stim_proc: process
    begin		
     --Test case 1 - 000000 01011 01100 01101 00000 100000   ADD R11,R12,R13
+        report "Test 1 - ADD R11,R12,R13";
         wait for 1 ns;	
 		w_enable 			<= '1';
 		w_addr		<= "01100";
@@ -203,18 +204,42 @@ BEGIN
         -------- CTRL signals --------
         assert reg_write <= '1' report "Test1: reg_write error" severity error;
         assert reg_dst <= '1' report "Test1: reg_write error" severity error;
--- mem_to_reg: 0
 
--- -- PC update
--- Jump: 0
--- branch: 0
--- -- Memory Access
--- mem_read: 0
--- mem_write: 0
--- -- Source Operand Fetch
--- alu_src: 0 -- select the second ALU input from either rt or sign-extended immediate
--- -- ALU Operation
--- alu_op: 0 -- ALU code for EXE
+        reset <= '1';
+
+    --Test case 2 - 000000 01010 01111 00000 00000 011000   MULT R10,R15,R0    R0=R10*R15
+        report "Test 2 - MULT R10,R15,R0";
+        wait for 1 ns;	
+        w_enable 			<= '1';
+        w_addr		<= "01100";
+        w_data 	<= "00000000000000000000000000001100";--random 32bit
+        wait for CLK_period;
+        
+        wait for 1 ns;	
+        w_enable 			<= '1';
+        w_addr		<= "01101";
+        w_data 	<= "00000000000000000000000000000110";--random 32bit
+        wait for CLK_period;
+        w_enable <='0';
+        pc_in <= (others => '0');
+        assert pc_out <= "00000000000000000000000000000000" report "Test2: pc_out error" severity error;
+        instruction_in <= "00000001010011110000000000011000";
+        w_data <= (others => '0');
+        w_addr <= (others => '0');
+        w_enable <= '1';
+        mem_reg <= (others => '0');
+
+        assert stall_out <= '0' report "Test2: stall_out error" severity error;
+        assert rs_addr <= "01010" report "Test2: rs_addr" severity error;
+        assert rt_addr <= "01111" report "Test2: rt_addr" severity error;
+        assert rs_data <= "00000000000000000000000000001100" report "Test2: rs_data" severity error;
+        assert rt_data <= "00000000000000000000000000000110" report "Test2: rt_data" severity error;
+        assert imm_32 <= "00000000000000000000000000000000" report "Test2: imm_32 error" severity error;
+        assert jump_addr <= "00000000000000000000000000000000" report "Test2: jump_addr error" severity error;
+        assert branch_addr <= "00000000000000000000000000000000" report "Test2: branch_addr error" severity error;
+        -------- CTRL signals --------
+        assert reg_write <= '1' report "Test2: reg_write error" severity error;
+        assert reg_dst <= '1' report "Test2: reg_write error" severity error;
 
       wait;
    end process;
