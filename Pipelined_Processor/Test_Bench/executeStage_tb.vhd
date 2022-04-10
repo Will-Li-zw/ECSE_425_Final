@@ -166,11 +166,108 @@ begin
         twomux_sel  <= '0';
         -- ALUcontrol  <= 2;
         wait for clk_period;   -- wait after the rising edge
-        assert ALUresult = x"00000003" report "Test1: Failed, ALU output not correct" severity error;
+        assert ALUresult = x"00000003" report "Test1: Failed, ALU addition not correct" severity error;
 
-        report "Test2: Test 1+2 = 3";
+        report "Test2-1: Test 3-4 = -1";
+        read_data_1 <= x"00000003";
+        read_data_2 <= x"00000004";
+        ALUcontrol  <= 1;
+        twomux_sel  <= '0';
+        wait for clk_period;   -- wait after the rising edge
+        assert ALUresult = x"FFFFFFFF" report "Test2-1: Failed, ALU subtraction not correct" severity error;
 
-        wait for clk_period;
+        report "Test2-2: Test 8-8 = 0";
+        read_data_1 <= x"00000008";
+        read_data_2 <= x"00000008";
+        ALUcontrol  <= 1;
+        twomux_sel  <= '0';
+        wait for clk_period;   -- wait after the rising edge
+        assert ALUresult = x"00000000" report "Test2-2: Failed, ALU subtraction not correct" severity error;
+
+        report "Test3: Test 18*775 = 13950";
+        read_data_1 <= x"00000012";
+        read_data_2 <= x"00000307";
+        ALUcontrol  <= 3;
+        twomux_sel  <= '0';
+        wait for clk_period;   -- wait after the rising edge
+        assert lo = x"0000367E" and hi=x"00000000" report "Test3: Failed, ALU multiplication not correct" severity error;
+
+
+        report "Test4: Test 10/3 ";
+        read_data_1 <= x"0000000A";
+        read_data_2 <= x"00000003";
+        ALUcontrol  <= 4;
+        twomux_sel  <= '0';
+        wait for clk_period;   -- wait after the rising edge
+        assert lo = x"00000003" and hi = x"00000001" report "Test4: Failed, ALU division not correct" severity error;
+
+        report "Test5-1: Test slt and slti instruction: data1<op2";
+        read_data_1 <= x"00000000";
+        read_data_2 <= x"00000001";
+        ALUcontrol  <= 5;
+        twomux_sel  <= '0';
+        wait for clk_period;   -- wait after the rising edge
+        assert ALUresult=x"00000001" report "Test5-1: Failed, slt not correct" severity error;
+
+        report "Test5-2: Test slt and slti instruction: data1>op2";
+        read_data_1 <= x"00000001";
+        read_data_2 <= x"00000000";
+        ALUcontrol  <= 5;
+        twomux_sel  <= '0';
+        wait for clk_period;   -- wait after the rising edge
+        assert ALUresult=x"00000000" report "Test5-2: Failed, slt not correct" severity error;
+
+        report "Test6: Test AND instruction:";
+        read_data_1 <= "01101000101111010101000101000010";
+        read_data_2 <= "00100101010010100100100001000100";
+        ALUcontrol  <= 7;
+        twomux_sel  <= '0';
+        wait for clk_period;   -- wait after the rising edge
+        assert ALUresult="00100000000010000100000001000000" report "Test6: Failed, and not correct" severity error;
+
+        report "Test7: Test OR instruction:";
+        read_data_1 <= "01101000101111010101000101000010";
+        read_data_2 <= "00100101010010100100100001000100";
+        ALUcontrol  <= 8;
+        twomux_sel  <= '0';
+        wait for clk_period;   -- wait after the rising edge
+        assert ALUresult = "01101101111111110101100101000110" report "Test7: Failed, or not correct" severity error;
+
+        report "Test8: Test LUI instruction:";
+        read_data_1 <= x"00000001";
+        read_data_2 <= "10100101000111001000100000001001";
+        ALUcontrol  <= 16;
+        twomux_sel  <= '0';
+        wait for clk_period;   -- wait after the rising edge
+        assert ALUresult = "10001000000010010000000000000000" report "Test8: Failed, LUI not correct" severity error;
+
+        report "Test9: Test SLL instruction:";
+        read_data_1 <= x"00000008";
+        read_data_2 <= x"00000004";
+        ALUcontrol  <= 17;
+        twomux_sel  <= '0';
+        wait for clk_period;   -- wait after the rising edge
+        assert ALUresult = x"00000080" report "Test9: Failed, SLL not correct" severity error;
+
+        report "Test10: Test SRL instruction:";
+        read_data_1 <= x"80000008";
+        read_data_2 <= x"00000004";
+        ALUcontrol  <= 18;
+        twomux_sel  <= '0';
+        wait for clk_period;   -- wait after the rising edge
+        assert ALUresult = x"08000000" report "Test10: Failed, SRL not correct" severity error;
+
+        report "Test11: Test SRA instruction:";
+        read_data_1 <= x"80000008";
+        read_data_2 <= x"00000004";
+        ALUcontrol  <= 19;
+        twomux_sel  <= '0';
+        wait for clk_period;   -- wait after the rising edge
+        assert ALUresult = x"F8000000" report "Test11: Failed, SRA not correct" severity error;
+
+        -- LD AND ST are trivial...
+
+        -- BNE AND BEQ are same as subtraction
 
         wait;
 
