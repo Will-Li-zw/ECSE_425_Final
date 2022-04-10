@@ -149,7 +149,7 @@ begin
         m_load <= '0';
 
         wait for clk_period;
-        wait for clk_period/2;
+        wait for clk_period/2;  -- here's rising edge of clk
 
         -- try to read the instruction
         -- report "Test1: instruction memory read";

@@ -113,7 +113,7 @@ begin
             -------------------- R-instruction--------------------
             if opcode = "000000" then   
                 -- hazard detection
-                if mem_reg = rs_s or mem_reg = rt_s then
+                if (mem_reg /= "UUUUU" or rs_s /= "UUUUU" or rt_s /= "UUUUU") and (mem_reg = rs_s or mem_reg = rt_s) then
                     stall_out <= '1';
                     last_stall <= '1';
                     funct := "111111";
@@ -150,7 +150,7 @@ begin
                 
             -------------------- I-instruction--------------------
             else
-                if mem_reg = rs_s then
+                if (mem_reg /= "UUUUU" or rs_s /= "UUUUU") and (mem_reg = rs_s) then
                     stall_out <= '1';
                     last_stall <= '1';
                 end if;
