@@ -168,14 +168,21 @@ begin
         wait for clk_period;   -- wait after the rising edge
         assert ALUresult = x"00000003" report "Test1: Failed, ALU addition not correct" severity error;
 
-        report "Test2: Test 3-4 = -1";
+        report "Test2-1: Test 3-4 = -1";
         read_data_1 <= x"00000003";
         read_data_2 <= x"00000004";
         ALUcontrol  <= 1;
         twomux_sel  <= '0';
         wait for clk_period;   -- wait after the rising edge
-        assert ALUresult = x"FFFFFFFF" report "Test2: Failed, ALU subtraction not correct" severity error;
+        assert ALUresult = x"FFFFFFFF" report "Test2-1: Failed, ALU subtraction not correct" severity error;
 
+        report "Test2-2: Test 8-8 = 0";
+        read_data_1 <= x"00000008";
+        read_data_2 <= x"00000008";
+        ALUcontrol  <= 1;
+        twomux_sel  <= '0';
+        wait for clk_period;   -- wait after the rising edge
+        assert ALUresult = x"00000000" report "Test2-2: Failed, ALU subtraction not correct" severity error;
 
         report "Test3: Test 18*775 = 13950";
         read_data_1 <= x"00000012";
