@@ -20,7 +20,7 @@ entity decode_stage is
         w_enable : in std_logic;
 
         mem_reg : in std_logic_vector(4 downto 0);
-        stall_out : out std_logic;
+        
 
         rs_addr : out std_logic_vector(4 downto 0);
         rt_addr : out std_logic_vector(4 downto 0);
@@ -31,6 +31,8 @@ entity decode_stage is
         branch_addr : out std_logic_vector(reg_adrsize-1 downto 0);
 
         -------- CTRL signals --------
+        -- whether to stall the fetch
+        stall_out : out std_logic;
         -- Register Write
         reg_write: out std_logic; -- determine if a result needs to be written to a register
         reg_dst: out std_logic; -- select the dst reg as either rs(R-type instruction) or rt(I-type instruction)
@@ -86,19 +88,39 @@ begin
     begin
         if rising_edge(clk) then
             if last_stall = '1' then
-                cur_instruction <= last_instruction;
+                -- cur_instruction <= last_instruction;
                 last_stall <= '0';
                 stall_out <= '0';
+                opcode := last_instruction(31 downto 26);
+                rs := last_instruction(25 downto 21);
+                rt := last_instruction(20 downto 16);
+                rd := last_instruction(15 downto 11);
+                shamt := last_instruction(10 downto 6);
+                funct := last_instruction(5 downto 0);
+                
+                imm_16 <= last_instruction(15 downto 0);  -- immediate value
+                jump_addr_s <= last_instruction(25 downto 0);
+                branch_addr_s <= last_instruction(25 downto 0);
             else
-                cur_instruction <= instruction_in;
+                -- cur_instruction <= instruction_in;
+                opcode := instruction_in(31 downto 26);
+                rs := instruction_in(25 downto 21);
+                rt := instruction_in(20 downto 16);
+                rd := instruction_in(15 downto 11);
+                shamt := instruction_in(10 downto 6);
+                funct := instruction_in(5 downto 0);
+
+                imm_16 <= instruction_in(15 downto 0);  -- immediate value
+                jump_addr_s <= instruction_in(25 downto 0);
+                branch_addr_s <= instruction_in(25 downto 0);
             end if;
 
-            opcode := cur_instruction(31 downto 26);
-            rs := cur_instruction(25 downto 21);
-            rt := cur_instruction(20 downto 16);
-            rd := cur_instruction(15 downto 11);
-            shamt := cur_instruction(10 downto 6);
-            funct := cur_instruction(5 downto 0);
+            -- opcode := cur_instruction(31 downto 26);
+            -- rs := cur_instruction(25 downto 21);
+            -- rt := cur_instruction(20 downto 16);
+            -- rd := cur_instruction(15 downto 11);
+            -- shamt := cur_instruction(10 downto 6);
+            -- funct := cur_instruction(5 downto 0);
 
             rs_s <= rs;
             rt_s <= rt;
@@ -106,17 +128,21 @@ begin
             rt_addr <= rt;
             pc_out <= pc_in;
 
-            imm_16 <= cur_instruction(15 downto 0);  -- immediate value
-            jump_addr_s <= cur_instruction(25 downto 0);
-            branch_addr_s <= cur_instruction(25 downto 0);
+            -- imm_16 <= cur_instruction(15 downto 0);  -- immediate value
+            -- jump_addr_s <= cur_instruction(25 downto 0);
+            -- branch_addr_s <= cur_instruction(25 downto 0);
 
             -------------------- R-instruction--------------------
             if opcode = "000000" then   
                 -- hazard detection
+                -- if depency detected ==> stall_out = 1, last_stall = 1
                 if (mem_reg /= "UUUUU" or rs_s /= "UUUUU" or rt_s /= "UUUUU") and (mem_reg = rs_s or mem_reg = rt_s) then
                     stall_out <= '1';
                     last_stall <= '1';
                     funct := "111111";
+                else -- otherwise, deassert the stall signal
+                    stall_out <= '0';
+                    last_stall <= '0';
                 end if;
                 case(funct) is 
                     when "100000" => alu_op <= 0;         -- 0. add
@@ -150,9 +176,12 @@ begin
                 
             -------------------- I-instruction--------------------
             else
-                if (mem_reg /= "UUUUU" or rs_s /= "UUUUU") and (mem_reg = rs_s) then
+                if (mem_reg /= "UUUUU" or rs_s /= "UUUUU") and (mem_reg = rs_s) then  -- if dependency detected
                     stall_out <= '1';
                     last_stall <= '1';
+                else 
+                    stall_out <= '0';
+                    last_stall <= '0';
                 end if;
 
                 if opcode = "001000" then  -- 2. addi
@@ -193,21 +222,23 @@ begin
                     alu_op <= 23;
                     branch_addr <= std_logic_vector(resize(unsigned(branch_addr_s), branch_addr'length));
                     ctrl_sigs <= "00001000";
-                else ctrl_sigs <= "00000000";
+                else 
+                    ctrl_sigs <= "00000000";
                 end if;  
             end if;
 
-            -- Control signal output
-            reg_write <= ctrl_sigs(7); -- determine if a result needs to be written to a register
-            reg_dst <= ctrl_sigs(6); -- select the dst reg as either rd(R-type instruction) or rt(I-type instruction)
-            mem_to_reg <= ctrl_sigs(5);
-            jump <= ctrl_sigs(4);
-            branch <= ctrl_sigs(3);
-            mem_read <= ctrl_sigs(2);
-            mem_write <= ctrl_sigs(1);
-            alu_src <= ctrl_sigs(0); -- select the second ALU input from either rt or sign-extended immediate
 
-            last_instruction <= cur_instruction;
+            last_instruction <= instruction_in;     -- each clock cycle update the last_instruction register to the latest one
         end if;
     end process;
+
+    -- Control signal output
+    reg_write <= ctrl_sigs(7); -- determine if a result needs to be written to a register
+    reg_dst <= ctrl_sigs(6); -- select the dst reg as either rd(R-type instruction) or rt(I-type instruction)
+    mem_to_reg <= ctrl_sigs(5);
+    jump <= ctrl_sigs(4);
+    branch <= ctrl_sigs(3);
+    mem_read <= ctrl_sigs(2);
+    mem_write <= ctrl_sigs(1);
+    alu_src <= ctrl_sigs(0); -- select the second ALU input from either rt or sign-extended immediate
 end Behavioral;

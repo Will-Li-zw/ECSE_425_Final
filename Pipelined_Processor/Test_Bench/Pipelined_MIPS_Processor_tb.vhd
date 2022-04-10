@@ -151,61 +151,7 @@ begin
         wait for clk_period;
         wait for clk_period/2;  -- here's rising edge of clk
 
-        -- try to read the instruction
-        -- report "Test1: instruction memory read";
-        -- i_addr <= 4;
-        -- i_read <= '1';
-        -- wait until rising_edge(m_waitrequest);
-        -- assert m_readinst = x"200F0004" report "Test1: Failed, read instruction unsuccessful" severity error;
-        -- i_read <= '0';
 
-        -- wait for clk_period*1.5;
-        
-        -- -- try to write the data memory
-        -- report "Test2: data memory write";
-        -- d_addr <= 4;
-        -- m_write <= '1';
-        -- m_writedata <= x"100B0004";
-        -- wait until rising_edge(m_waitrequest);
-        -- m_write <= '0';
-        -- d_addr <= 4;    -- initiate a data read
-        -- d_read <= '1';
-        -- wait until rising_edge(m_waitrequest);
-        -- assert m_readdata = x"100B0004" report "Test2: Failed, write data unsuccessful" severity error; -- this passes the test actually. ignore
-        -- d_read <= '0';
-
-        -- wait for clk_period;  
-
-        -- report "Test3: data memory I/O";
-        -- m_output <= '1';
-        -- wait for clk_period;
-        -- m_output <= '0';
-
-
-        -- -- try to read the instruction and memory at same time
-        -- report "Test4: instruction+data memory read";
-        -- i_addr <= 4;
-        -- i_read <= '1';
-        -- d_addr <= 4;    -- initiate a data read
-        -- d_read <= '1';
-        -- wait until rising_edge(m_waitrequest);
-        -- assert m_readinst = x"200F0004" report "Test4-1: Failed, read instruction unsuccessful" severity error;
-        -- assert m_readdata = x"100B0004" report "Test4-2: Failed, write data unsuccessful" severity error; 
-        -- i_read <= '0';
-        -- d_read <= '0';
-        -- wait for clk_period/2;
-            
-        -- -- try to read the instruction and write memory at same time
-        -- report "Test5: instruction memory read + data write";
-        -- i_addr <= 4;
-        -- i_read <= '1';
-        -- d_addr <= 8;
-        -- m_write <= '1';
-        -- m_writedata <= x"0C0B0A09";
-        -- wait until rising_edge(m_waitrequest);
-        -- assert m_readinst = x"200F0004" report "Test5: Failed, read instruction unsuccessful" severity error;
-        -- i_read <= '0';
-        -- m_write <= '0';
 
         wait;
 
