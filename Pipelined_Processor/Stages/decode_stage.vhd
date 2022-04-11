@@ -24,6 +24,7 @@ entity decode_stage is
 
         rs_addr : out std_logic_vector(4 downto 0);
         rt_addr : out std_logic_vector(4 downto 0);
+        rd_addr : out std_logic_vector(4 downto 0);             -- destination register addr
         rs_data : out std_logic_vector(reg_adrsize-1 downto 0); -- contents of rs
         rt_data : out std_logic_vector(reg_adrsize-1 downto 0); -- contents of rt
         imm_32 : out std_logic_vector(reg_adrsize-1 downto 0);  -- sign extended immediate value
@@ -46,7 +47,7 @@ entity decode_stage is
         -- Source Operand Fetch
         alu_src: out std_logic; -- select the second ALU input from either rt or sign-extended immediate
         -- ALU Operation
-        alu_op: out integer -- ALU code for EXE
+        alu_op: out integer range 0 to 27 -- ALU code for EXE
     );
 end entity;
 
@@ -115,22 +116,12 @@ begin
                 branch_addr_s <= instruction_in(25 downto 0);
             end if;
 
-            -- opcode := cur_instruction(31 downto 26);
-            -- rs := cur_instruction(25 downto 21);
-            -- rt := cur_instruction(20 downto 16);
-            -- rd := cur_instruction(15 downto 11);
-            -- shamt := cur_instruction(10 downto 6);
-            -- funct := cur_instruction(5 downto 0);
-
             rs_s <= rs;
             rt_s <= rt;
+            rd_addr <= rd;
             rs_addr <= rs;
             rt_addr <= rt;
             pc_out <= pc_in;
-
-            -- imm_16 <= cur_instruction(15 downto 0);  -- immediate value
-            -- jump_addr_s <= cur_instruction(25 downto 0);
-            -- branch_addr_s <= cur_instruction(25 downto 0);
 
             -------------------- R-instruction--------------------
             if opcode = "000000" then   
@@ -186,27 +177,27 @@ begin
 
                 if opcode = "001000" then  -- 2. addi
                     alu_op <= 2;
-                    imm_32 <= std_logic_vector(resize(signed(imm_16), imm_32'length));
+                    
                     ctrl_sigs <= "10000001";   
                 elsif opcode = "001010" then  -- 6. slti
                     alu_op <= 6;
-                    imm_32 <= std_logic_vector(resize(signed(imm_16), imm_32'length));
+                    -- imm_32 <= std_logic_vector(resize(signed(imm_16), imm_32'length));
                     ctrl_sigs <= "10000001";
                 elsif opcode = "001100" then  -- 11. andi
                     alu_op <= 11;
-                    imm_32 <= std_logic_vector(resize(signed(imm_16), imm_32'length));
+                    -- imm_32 <= std_logic_vector(resize(signed(imm_16), imm_32'length));
                     ctrl_sigs <= "10000001";  
                 elsif opcode = "001101" then  -- 12. ori
                     alu_op <= 12;
-                    imm_32 <= std_logic_vector(resize(signed(imm_16), imm_32'length));
+                    -- imm_32 <= std_logic_vector(resize(signed(imm_16), imm_32'length));
                     ctrl_sigs <= "10000001";
                 elsif opcode = "001110" then  -- 13. xori
                     alu_op <= 13;
-                    imm_32 <= std_logic_vector(resize(signed(imm_16), imm_32'length));
+                    -- imm_32 <= std_logic_vector(resize(signed(imm_16), imm_32'length));
                     ctrl_sigs <= "10000001";  
                 elsif opcode = "001111" then  -- 16. lui
                     alu_op <= 16;
-                    imm_32 <= std_logic_vector(resize(signed(imm_16), imm_32'length));
+                    -- imm_32 <= std_logic_vector(resize(signed(imm_16), imm_32'length));
                     ctrl_sigs <= "10000001"; 
                 elsif opcode = "100011" then  -- 20. lw
                     alu_op <= 20;   
@@ -231,6 +222,9 @@ begin
             last_instruction <= instruction_in;     -- each clock cycle update the last_instruction register to the latest one
         end if;
     end process;
+
+    -- always output the immediatevalue; circuit are taken care by control signals
+    imm_32 <= std_logic_vector(resize(signed(imm_16), imm_32'length));
 
     -- Control signal output
     reg_write <= ctrl_sigs(7); -- determine if a result needs to be written to a register

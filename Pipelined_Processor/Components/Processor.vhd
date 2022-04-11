@@ -73,9 +73,10 @@ architecture behavior of Processor is
 
         rs_addr : out std_logic_vector(4 downto 0);
         rt_addr : out std_logic_vector(4 downto 0);
-        rs_data : out std_logic_vector(reg_adrsize-1 downto 0); -- contents of rs
-        rt_data : out std_logic_vector(reg_adrsize-1 downto 0); -- contents of rt
-        imm_32 : out std_logic_vector(reg_adrsize-1 downto 0);  -- sign extended immediate value
+		rd_addr : out std_logic_vector(4 downto 0);             	-- destination register addr
+        rs_data : out std_logic_vector(reg_adrsize-1 downto 0); 	-- contents of rs
+        rt_data : out std_logic_vector(reg_adrsize-1 downto 0); 	-- contents of rt
+        imm_32 : out std_logic_vector(reg_adrsize-1 downto 0);  	-- sign extended immediate value
         jump_addr : out std_logic_vector(reg_adrsize-1 downto 0);
         branch_addr : out std_logic_vector(reg_adrsize-1 downto 0);
 
@@ -93,15 +94,55 @@ architecture behavior of Processor is
         -- Source Operand Fetch
         alu_src: out std_logic; -- select the second ALU input from either rt or sign-extended immediate
         -- ALU Operation
-        alu_op: out integer -- ALU code for EXE
+        alu_op: out integer range 0 to 27 -- ALU code for EXE
     );
 	end component;
 
-	-- component execute is 
-	-- port(
-	-- 	--
-	-- );
-	-- end component;
+	component execute_stage is 
+	port(
+        --------------
+        -- *inputs* --
+        --------------
+        clk : in std_logic;
+		read_data_1 : in signed(31 downto 0);       -- register data 1
+        read_data_2 : in signed(31 downto 0);       -- register data 2
+        ALUcontrol : in integer range 0 to 27;      -- interpreted op code from DECODE->EXE
+        extended_lower_15_bits : in signed(31 downto 0); -- lower 16 bits (sign/zero extended to 32) passed in
+        pc_plus_4 : in std_logic_vector(31 downto 0);   -- carried pc_next value from FET->DEC->EXE->...
+        -- reg address
+        rt : in std_logic_vector(4 downto 0); 
+        rs : in std_logic_vector(4 downto 0); -- TODO: may not need??
+        rd : in std_logic_vector(4 downto 0);
+        -- control inputs:
+		twomux_sel : in std_logic; -- choose read data 2 or immediate
+        -- forwarding inputs:
+        mem_exe_reg_data    : in signed(31 downto 0);                       -- account for MEM->EXE forwarding
+        mem_exe_reg_addr    : in std_logic_vector(4 downto 0); 
+        forwarded_exe_exe_reg_data    : in signed(31 downto 0);             -- account for EXE->EXE forwarding
+        forwarded_exe_exe_reg_addr    : in std_logic_vector(4 downto 0);  
+        ---------------
+        -- *outputs* --
+        ---------------
+        -- forwarding outputs:
+        forwarding_exe_exe_reg_data    : out signed(31 downto 0);           -- output forwarding to next CC EXE
+        forwarding_exe_exe_reg_addr    : out std_logic_vector(4 downto 0); 
+        reg_address : out std_logic_vector(4 downto 0);
+        -- register to be written (WB), for R type instrustion (reg_address = rd)
+		-- register to be loaded by memory data (MEM LW), for I type instrustion (reg_address = rt)
+        read_data_2_out : out signed(31 downto 0); -- write_data for Mem
+		pc_plus_4_out : out std_logic_vector(31 downto 0);
+        Addresult : out signed(31 downto 0);
+        zero : out std_logic;
+		ALUresult : out signed(31 downto 0);
+        hi : out signed(31 downto 0);
+        lo : out signed(31 downto 0);  
+        -- control outputs (TODO: may not be complete)
+        reg_file_enable_out : out std_logic;
+        mem_to_reg_flag_out : out std_logic;
+        mem_write_request_out : out std_logic;
+        meme_read_request_out : out std_logic
+	);
+	end component;
 
 	-- component memory is 
 	-- port(
@@ -132,6 +173,7 @@ architecture behavior of Processor is
 	signal mem_decode_reg	     : std_logic_vector (4 downto 0);			 -- from MEM->DECODE for judging stall
 	signal decode_execute_rs_reg : std_logic_vector(4 downto 0);			 -- rs addr DECODE->EXE
 	signal decode_execute_rt_reg : std_logic_vector(4 downto 0);			 -- rt addr DECODE->EXE
+	signal decode_execute_rd_reg : std_logic_vector(4 downto 0);			 -- rd addr DECODE->...->WB->DEC to write register file
 	signal decode_execute_rs_data: std_logic_vector(word_size-1 downto 0);	 -- rs data DECODE->EXE
 	signal decode_execute_rt_data: std_logic_vector(word_size-1 downto 0);   -- rt data DECODE->EXE
 	signal decode_execute_imme_data 	: std_logic_vector(word_size-1 downto 0);   -- immediate value DECODE->EXE
@@ -144,8 +186,19 @@ architecture behavior of Processor is
 	signal decode_execute_mem_read		: std_logic;	-- mem read req to MEM, DECODE->...->MEM
 	signal decode_execute_mem_write		: std_logic;	-- mem write req to MEM, DECODE->...->MEM
 	signal decode_execute_alu_src		: std_logic;	-- alu_src control signal, DECODE->EXE
-	signal decode_execute_alu_op		: integer;	-- alu_op control signal, DECODE->EXE
-	
+	signal decode_execute_alu_op		: integer range 0 to 27 := 0;	-- alu_op control signal, DECODE->EXE
+
+	-- signals related to execute:
+	signal pc_out_exe_mem 			: std_logic_vector (word_size-1 downto 0);  -- next_pc value
+	signal forward_mem_exe_reg_data	: std_logic_vector(word_size-1 downto 0);   -- register value from MEM->EXE forwarding
+	signal forward_mem_exe_reg_addr	: std_logic_vector(4 downto 0);				-- register addr from MEM->EXE forwarding
+	signal forward_exe_exe_reg_data	: std_logic_vector(word_size-1 downto 0);	-- register value from EXE->EXE forwarding
+	signal forward_exe_exe_reg_addr	: std_logic_vector(4 downto 0);	-- register addr from EXE->EXE forwarding
+	signal exe_mem_or_wb_reg_addr	: std_logic_vector(4 downto 0);				-- register addr for WB or MEM load
+	signal store_exe_mem_data		: std_logic_vector(word_size-1 downto 0);	-- output data for STORE instruction EXE->MEM
+	signal exe_alu_result			: std_logic_vector(word_size-1 downto 0);	-- output of ALU calculation EXE->MEM
+	signal exe_hi					: std_logic_vector(word_size-1 downto 0);	-- output of exe mul or div, hi32 bits
+	signal exe_lo					: std_logic_vector(word_size-1 downto 0);	-- output of exe mul or div, lo32 bits
 
 begin
 	-- 连连看:
@@ -181,7 +234,8 @@ begin
 		stall_out => stall_req,					  -- stall that goes to fetch
 		-- output register addr to following stage
 		rs_addr   => decode_execute_rs_reg,		 
-		rt_addr   => decode_execute_rt_reg,		 
+		rt_addr   => decode_execute_rt_reg,
+		rd_addr	  => decode_execute_rd_reg,		 
 		rs_data   => decode_execute_rs_data,	  
 		rt_data   => decode_execute_rt_data,     
 		imm_32    => decode_execute_imme_data,	  
@@ -205,7 +259,54 @@ begin
 		alu_op		=> decode_execute_alu_op   -- ALU code for EXE
    );
 
-   	--inst_read_addr <= inst_addr_buffer;	 -- might cause sync error
+   executer : execute_stage
+   port map(
+        clk 					=> clock,
+		read_data_1 			=> signed(decode_execute_rs_data),
+        read_data_2 			=> signed(decode_execute_rt_data),
+        ALUcontrol 				=> decode_execute_alu_op,
+        extended_lower_15_bits 	=> signed(decode_execute_imme_data),
+        pc_plus_4 				=> pc_out_decode_execute,
+        
+        -- reg address
+        rt => decode_execute_rt_reg,
+        rs => decode_execute_rs_reg,
+        rd => decode_execute_rd_reg,
+        
+        -- control inputs:
+		twomux_sel 				=> decode_execute_alu_src,
+
+        -- forwarding inputs:
+        mem_exe_reg_data    	=> signed(forward_mem_exe_reg_data),
+        mem_exe_reg_addr    	=> forward_mem_exe_reg_addr,
+        forwarded_exe_exe_reg_data => signed(forward_exe_exe_reg_data),
+        forwarded_exe_exe_reg_addr => forward_exe_exe_reg_addr,
+        
+        ---------------
+        -- *outputs* --
+        ---------------
+        -- forwarding outputs:
+        std_logic_vector(forwarding_exe_exe_reg_data) => forward_exe_exe_reg_data,       
+        forwarding_exe_exe_reg_addr => forward_exe_exe_reg_addr,
+
+        reg_address => exe_mem_or_wb_reg_addr,
+        -- register to be written (WB), for R type instrustion (reg_address = rd)
+		-- register to be loaded by memory data (MEM LW), for I type instrustion (reg_address = rt)
+        std_logic_vector(read_data_2_out) 	=> store_exe_mem_data,
+		pc_plus_4_out 						=> pc_out_exe_mem,
+        std_logic_vector(Addresult)			=> ex_branch_addr,
+        zero 			=> open,
+		std_logic_vector(ALUresult) 		=> exe_alu_result,
+        std_logic_vector(hi) 				=> exe_hi,
+        std_logic_vector(lo) 				=> exe_lo,
+        
+        -- control outputs (TODO: may not be complete)
+        reg_file_enable_out	 	=> open,
+        mem_to_reg_flag_out 	=> open,
+        mem_write_request_out 	=> open, 
+        meme_read_request_out 	=> open
+   );
+
 
 	-- output instread_req
 	instruction_read_req : process(reset)

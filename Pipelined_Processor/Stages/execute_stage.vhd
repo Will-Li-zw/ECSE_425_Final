@@ -11,7 +11,7 @@ entity execute_stage is
         clk : in std_logic;
 		read_data_1 : in signed(31 downto 0);       -- register data 1
         read_data_2 : in signed(31 downto 0);       -- register data 2
-        ALUcontrol : in integer range 0 to 26;      -- interpreted op code from DECODE->EXE
+        ALUcontrol : in integer range 0 to 27;      -- interpreted op code from DECODE->EXE
         extended_lower_15_bits : in signed(31 downto 0); -- lower 16 bits (sign/zero extended to 32) passed in
         pc_plus_4 : in std_logic_vector(31 downto 0);   -- carried pc_next value from FET->DEC->EXE->...
         
@@ -22,10 +22,12 @@ entity execute_stage is
         
         -- control inputs:
 		twomux_sel : in std_logic; -- choose read data 2 or immediate
-		reg_file_enable_in : in std_logic;
-        mem_to_reg_flag_in : in std_logic;
-        mem_write_request_in : in std_logic;
-        mem_read_request_in : in std_logic;
+
+        -- TODO: what are the meaning of these signals
+		-- reg_file_enable_in : in std_logic;
+        -- mem_to_reg_flag_in : in std_logic;
+        -- mem_write_request_in : in std_logic;
+        -- mem_read_request_in : in std_logic;
 
         -- forwarding inputs:
         mem_exe_reg_data    : in signed(31 downto 0);                       -- account for MEM->EXE forwarding
@@ -52,6 +54,9 @@ entity execute_stage is
 		ALUresult : out signed(31 downto 0);
         hi : out signed(31 downto 0);
         lo : out signed(31 downto 0);
+
+        -- TODO: if_branch signal is not generated
+        -- if_branch : out std_logic;
         
         -- control outputs (TODO: may not be complete)
         reg_file_enable_out : out std_logic;
