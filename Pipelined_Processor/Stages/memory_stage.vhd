@@ -3,7 +3,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 entity memory_stage is
     generic(
-        word_width: integer := 32
+        word_width: integer := 32;
         reg_addr_width: integer := 5
     );
 
@@ -37,6 +37,7 @@ end memory_stage;
 
 architecture Behavior of memory_stage is
 
+begin
     memory: process(clock)
     begin
         if rising_edge(clock) then
@@ -48,7 +49,7 @@ architecture Behavior of memory_stage is
 
             -- passing memory data and address 
             mem_addr_out <= alu_result_in; -- note that this may not be an address, if it isn't, control signals prevent such interpretation
-            mem_write_data_out <= mem_write_data_in;
+            mem_write_data_out <= mem_write_data_in;    -- for STORE instruction to modify memory
 
             -- passing register data and address for writeback
             alu_result_out <= alu_result_in; -- similarly this may not be a result for writeback

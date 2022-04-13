@@ -24,8 +24,8 @@ entity Processor is
         datawrite_req   : out std_logic;
         instread_req	: out std_logic;
         dataread_req	: out std_logic;
-		inst_read_addr  : out std_logic_vector(word_size-1 downto 0);
-        data_read_addr  : out std_logic_vector(word_size-1 downto 0);
+		inst_addr  		: out std_logic_vector(word_size-1 downto 0);
+        data_addr  		: out std_logic_vector(word_size-1 downto 0);
         write_data  	: out std_logic_vector(word_size-1 downto 0)
 	);
 end Processor;
@@ -144,11 +144,34 @@ architecture behavior of Processor is
 	);
 	end component;
 
-	-- component memory is 
-	-- port(
-	-- 	--
-	-- );
-	-- end component;
+	component memory_stage is 
+	generic(
+        word_width: integer := 32;
+        reg_addr_width: integer := 5
+    );
+    port(
+        clock: in std_logic;
+        --input signals
+        alu_result_in: in std_logic_vector (word_width-1 downto 0);
+        reg_write_addr_in: in std_logic_vector (reg_addr_width-1 downto 0);
+        mem_write_data_in: in std_logic_vector (word_width-1 downto 0);
+        --input control signals
+        reg_file_enable_in: in std_logic;
+        mem_to_reg_flag_in: in std_logic;
+        mem_write_request_in: in std_logic;
+        mem_read_request_in: in std_logic;
+        --output signals
+        mem_write_data_out: out std_logic_vector (word_width-1 downto 0);
+        mem_addr_out: out std_logic_vector (word_width-1 downto 0);
+        alu_result_out: out std_logic_vector (word_width-1 downto 0);
+        reg_write_addr_out: out std_logic_vector (reg_addr_width-1 downto 0);
+        --output control signals
+        reg_file_enable_out: out std_logic;
+        mem_to_reg_flag_out: out std_logic;
+        mem_write_request_out: out std_logic;
+        mem_read_request_out: out std_logic
+    );
+	end component;
 
 	-- component writeback is 
 	-- port(
@@ -195,10 +218,26 @@ architecture behavior of Processor is
 	signal forward_exe_exe_reg_data	: std_logic_vector(word_size-1 downto 0);	-- register value from EXE->EXE forwarding
 	signal forward_exe_exe_reg_addr	: std_logic_vector(4 downto 0);	-- register addr from EXE->EXE forwarding
 	signal exe_mem_or_wb_reg_addr	: std_logic_vector(4 downto 0);				-- register addr for WB or MEM load
-	signal store_exe_mem_data		: std_logic_vector(word_size-1 downto 0);	-- output data for STORE instruction EXE->MEM
+	signal store_exe_mem_data		: std_logic_vector(word_size-1 downto 0);	-- output data for STORE instruction DEC->EXE->MEM
 	signal exe_alu_result			: std_logic_vector(word_size-1 downto 0);	-- output of ALU calculation EXE->MEM
 	signal exe_hi					: std_logic_vector(word_size-1 downto 0);	-- output of exe mul or div, hi32 bits
 	signal exe_lo					: std_logic_vector(word_size-1 downto 0);	-- output of exe mul or div, lo32 bits
+		-- ctrl signals
+	signal exe_mem_reg_file_enable	: std_logic;	-- carried signal for WB to write register	DEC->...->DEC
+	signal exe_mem_mem_to_reg		: std_logic;	-- carried signal for WB to select data to writeback DEC->...->WB
+	signal exe_mem_mem_write		: std_logic;	-- carried signal for MEM to decide STORE 
+	signal exe_mem_mem_read			: std_logic;	-- carried signal for MEM to decide LOAD
+
+	-- signal related to memory
+	signal mem_wb_alu_res			: std_logic_vector(word_size-1 downto 0); 	-- carried signal for EXE->MEM->WB
+	signal mem_wb_reg_write_addr	: std_logic_vector(4 downto 0);
+
+	signal mem_wb_reg_enable		: std_logic;	-- carried signal for WB to write register	DEC->...->DEC
+	signal mem_wb_mem_to_reg		: std_logic;	-- carried signal for WB to select data to writeback DEC->...->WB
+
+
+
+
 
 begin
 	-- 连连看:
@@ -213,7 +252,7 @@ begin
 		jump_addr      => de_jump_addr,
 		branch_addr    => ex_branch_addr,
 
-		pc             => inst_read_addr,
+		pc             => inst_addr,
 		pc_next        => pc_out_fetch_decode
    );
 
@@ -274,7 +313,7 @@ begin
         rd => decode_execute_rd_reg,
         
         -- control inputs:
-		twomux_sel 				=> decode_execute_alu_src,
+		twomux_sel 				=> decode_execute_alu_src,				-- TODO: Hold on, this map maybe wrong
 
         -- forwarding inputs:
         mem_exe_reg_data    	=> signed(forward_mem_exe_reg_data),
@@ -295,23 +334,49 @@ begin
         std_logic_vector(read_data_2_out) 	=> store_exe_mem_data,
 		pc_plus_4_out 						=> pc_out_exe_mem,
         std_logic_vector(Addresult)			=> ex_branch_addr,
-        zero 			=> open,
+        zero 								=> open,
 		std_logic_vector(ALUresult) 		=> exe_alu_result,
         std_logic_vector(hi) 				=> exe_hi,
         std_logic_vector(lo) 				=> exe_lo,
         
         -- control outputs (TODO: may not be complete)
-        reg_file_enable_out	 	=> open,
-        mem_to_reg_flag_out 	=> open,
-        mem_write_request_out 	=> open, 
-        meme_read_request_out 	=> open
+        reg_file_enable_out	 	=> exe_mem_reg_file_enable,
+        mem_to_reg_flag_out 	=> exe_mem_mem_to_reg,
+        mem_write_request_out 	=> exe_mem_mem_write, 
+        meme_read_request_out 	=> exe_mem_mem_read
    );
 
+   memoryer : memory_stage
+   	port map(
+		clock		=> clock,
+        --input signals
+        alu_result_in		=> exe_alu_result,
+        reg_write_addr_in	=> exe_mem_or_wb_reg_addr,
+        mem_write_data_in	=> store_exe_mem_data,
+
+        --input control signals
+        reg_file_enable_in	=> exe_mem_reg_file_enable,
+        mem_to_reg_flag_in	=> exe_mem_mem_to_reg,
+        mem_write_request_in=> exe_mem_mem_write,
+        mem_read_request_in	=> exe_mem_mem_read,
+        
+        --output signals
+        mem_write_data_out	=> write_data,			-- direct output of Processor to talk with memory
+        mem_addr_out		=> data_addr,			-- direct output of Processor: data_addr to be written/read
+        alu_result_out		=> mem_wb_alu_res,		
+        reg_write_addr_out	=> mem_wb_reg_write_addr,
+
+        --output control signals
+        reg_file_enable_out		=> mem_wb_reg_enable,
+        mem_to_reg_flag_out		=> mem_wb_mem_to_reg,
+        mem_write_request_out	=> datawrite_req,	-- direct output of Processor: data write request
+        mem_read_request_out	=> dataread_req		-- direct output of Processor: data read request
+   	);
 
 	-- output instread_req
 	instruction_read_req : process(reset)
 	begin	
-			-- when pc is available, output inst_read_req = '1'
+			-- when pc is available, output inst_read_req = '1', fetch should always try to read memory
 			if reset = '1' then -- reset all control signal
 				instread_req <= '0';
 				datawrite_req<= '0';

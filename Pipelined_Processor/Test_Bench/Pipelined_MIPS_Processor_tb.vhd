@@ -25,8 +25,8 @@ component Processor is
         datawrite_req   : out std_logic;
         instread_req	: out std_logic;
         dataread_req	: out std_logic;
-		inst_read_addr  : out std_logic_vector(word_size-1 downto 0);
-        data_read_addr  : out std_logic_vector(word_size-1 downto 0);
+		inst_addr       : out std_logic_vector(word_size-1 downto 0);
+        data_addr       : out std_logic_vector(word_size-1 downto 0);
         write_data  	: out std_logic_vector(word_size-1 downto 0)
 	);
 end component;
@@ -104,8 +104,8 @@ begin
         datawrite_req   => write_req,  -- request to write DATAMEM
         instread_req => instread_req,   -- request to read INSTMEM
         dataread_req => dataread_req,   -- request to read DATAMEM
-        inst_read_addr => inst_addr,    -- instruction read target
-        data_read_addr => data_addr,    -- data read target
+        inst_addr => inst_addr,    -- instruction read target
+        data_addr => data_addr,    -- data read target
         write_data  => write_data       -- provided data to write to memory: eg. STORE instruciton
     );
 
