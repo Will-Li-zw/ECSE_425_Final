@@ -173,11 +173,26 @@ architecture behavior of Processor is
     );
 	end component;
 
-	-- component writeback is 
-	-- port(
-	-- 	--
-	-- );
-	-- end component;
+	component writeback_stage is 
+	generic(
+        word_width: integer := 32;
+        reg_address_width: integer := 5
+    );
+    port(
+        clock: in std_logic;
+        -- input signals
+        read_data: in std_logic_vector (word_width-1 downto 0);
+        alu_result: in std_logic_vector (word_width-1 downto 0);
+        reg_address_in: in std_logic_vector (reg_address_width-1 downto 0);
+        -- input control signals
+        mem_to_reg_flag: in std_logic;
+        reg_file_enable_in: in std_logic;
+        -- output signals
+        reg_file_enable_out: out std_logic;
+        reg_address_out: out std_logic_vector (reg_address_width-1 downto 0);
+        write_data: out std_logic_vector (word_width-1 downto 0)
+	);
+	end component;
 
 	-- signals related to fetch:
 	signal pc_out_fetch_decode	: std_logic_vector (word_size-1 downto 0);  -- next_pc value
@@ -372,6 +387,22 @@ begin
         mem_write_request_out	=> datawrite_req,	-- direct output of Processor: data write request
         mem_read_request_out	=> dataread_req		-- direct output of Processor: data read request
    	);
+
+	writer	: writeback_stage
+	port map(
+		clock			=> clock,
+        -- input signals
+        read_data		=> read_data,				-- this is recieved from memory unit 
+        alu_result		=> mem_wb_alu_res,
+        reg_address_in	=> mem_wb_reg_write_addr,
+        -- input control signals
+        mem_to_reg_flag		=> mem_wb_mem_to_reg,
+        reg_file_enable_in	=> mem_wb_reg_enable,
+        -- output signals
+        reg_file_enable_out	=> write_back_enable,	
+        reg_address_out		=> write_back_reg,
+        write_data			=> write_back_data
+	);
 
 	-- output instread_req
 	instruction_read_req : process(reset)
