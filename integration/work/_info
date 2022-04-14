@@ -1,0 +1,503 @@
+m255
+K4
+z2
+13
+!s112 1.1
+!i10d 8192
+!i10e 25
+!i10f 100
+cModel Technology
+dC:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/local_sim/execute_unit
+Eadd
+Z0 w1649181062
+Z1 DPx4 ieee 11 numeric_std 0 22 :ASDNFgHXf_ih3J@9F3Ze1
+Z2 DPx3 std 6 textio 0 22 zE1`LPoLg^DX3Oz^4Fj1K3
+Z3 DPx4 ieee 14 std_logic_1164 0 22 eNV`TJ_GofJTzYa?f<@Oe1
+Z4 dC:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/local_sim/integration
+Z5 8C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/executionStage/ADD.vhd
+Z6 FC:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/executionStage/ADD.vhd
+l0
+L5
+V;TkGn^85P1S199W;f]3be1
+!s100 kI^VJH[CXhH?7_^1kjn>@1
+Z7 OV;C;10.5b;63
+32
+Z8 !s110 1649940117
+!i10b 1
+Z9 !s108 1649940117.000000
+Z10 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/executionStage/ADD.vhd|
+Z11 !s107 C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/executionStage/ADD.vhd|
+!i113 1
+Z12 o-work work -2002 -explicit
+Z13 tExplicit 1 CvgOpt 0
+Acomb
+R1
+R2
+R3
+DEx4 work 3 add 0 22 ;TkGn^85P1S199W;f]3be1
+l16
+L15
+V]PzYJIRd5c4R205MG[@mJ3
+!s100 do@;I1@c@Dc>LYjQ?MQBM2
+R7
+32
+R8
+!i10b 1
+R9
+R10
+R11
+!i113 1
+R12
+R13
+Ealu
+Z14 w1649551083
+R1
+R2
+R3
+R4
+Z15 8C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/executionStage/ALU.vhd
+Z16 FC:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/executionStage/ALU.vhd
+l0
+L5
+V]OfhL1bj6jPJ?@EIM;5XP3
+!s100 GYMFIfc^32aLnn5o_I:^a0
+R7
+32
+R8
+!i10b 1
+R9
+Z17 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/executionStage/ALU.vhd|
+Z18 !s107 C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/executionStage/ALU.vhd|
+!i113 1
+R12
+R13
+Aarith
+R1
+R2
+R3
+DEx4 work 3 alu 0 22 ]OfhL1bj6jPJ?@EIM;5XP3
+l25
+L18
+Vke?lDW09XVC?@m[o1BhMB3
+!s100 nL?72Ca[N0[nIA44`MlXN0
+R7
+32
+R8
+!i10b 1
+R9
+R17
+R18
+!i113 1
+R12
+R13
+Edecode_stage
+Z19 w1649940149
+R1
+R2
+R3
+R4
+Z20 8C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Stages/decode_stage.vhd
+Z21 FC:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Stages/decode_stage.vhd
+l0
+L5
+VUV=dM91a`:[LVMNKn?ROS2
+!s100 W@F:YR4:9UG@>[88N9R911
+R7
+32
+Z22 !s110 1649940154
+!i10b 1
+Z23 !s108 1649940154.000000
+Z24 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Stages/decode_stage.vhd|
+Z25 !s107 C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Stages/decode_stage.vhd|
+!i113 1
+R12
+R13
+Abehavioral
+Z26 DEx4 work 13 register_file 0 22 M<hKGc:;>0iPD3=E02=4V3
+R1
+R2
+R3
+Z27 DEx4 work 12 decode_stage 0 22 UV=dM91a`:[LVMNKn?ROS2
+l64
+L54
+V>nVF`^AjhgeB79bfgDY[Q2
+!s100 ;=X3=<3zoo`Q:_d3iP5`22
+R7
+32
+R22
+!i10b 1
+R23
+R24
+R25
+!i113 1
+R12
+R13
+Eexecute_stage
+Z28 w1649904531
+R1
+R2
+R3
+R4
+Z29 8C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Stages/execute_stage.vhd
+Z30 FC:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Stages/execute_stage.vhd
+l0
+L6
+V<06_:<5RK=La_[YdEUEd@2
+!s100 DH1AH8fKAQ`h8D07J;a4N2
+R7
+32
+R8
+!i10b 1
+R9
+Z31 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Stages/execute_stage.vhd|
+Z32 !s107 C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Stages/execute_stage.vhd|
+!i113 1
+R12
+R13
+Aexe
+R1
+R2
+R3
+DEx4 work 13 execute_stage 0 22 <06_:<5RK=La_[YdEUEd@2
+l122
+L70
+Vfi;OaohPKPA9>BHkFU<ff0
+!s100 od:=NS6^]3dg1^4R<nGJa0
+R7
+32
+R8
+!i10b 1
+R9
+R31
+R32
+!i113 1
+R12
+R13
+Efetch_stage
+Z33 w1649270825
+R1
+R2
+R3
+R4
+Z34 8C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Stages/fetch_stage.vhd
+Z35 FC:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Stages/fetch_stage.vhd
+l0
+L5
+VJ>I5PQf?Kb1H>QB>6Pz5f0
+!s100 [;fUUI`IK;Nabk_jBUNkm0
+R7
+32
+Z36 !s110 1649940116
+!i10b 1
+Z37 !s108 1649940116.000000
+Z38 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Stages/fetch_stage.vhd|
+Z39 !s107 C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Stages/fetch_stage.vhd|
+!i113 1
+R12
+R13
+Aarch
+R1
+R2
+R3
+DEx4 work 11 fetch_stage 0 22 J>I5PQf?Kb1H>QB>6Pz5f0
+l55
+L25
+VCYWXY:5R9UI]Lo:f4Ki7Z0
+!s100 _^Uk=Oni?e27^o88=kedA0
+R7
+32
+R36
+!i10b 1
+R37
+R38
+R39
+!i113 1
+R12
+R13
+Ememory
+Z40 w1648936354
+Z41 DPx4 ieee 16 std_logic_textio 0 22 V5TSK`;aJKC<l]CEg1>mz1
+R1
+R2
+R3
+R4
+Z42 8C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Components/memory.vhd
+Z43 FC:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Components/memory.vhd
+l0
+L10
+VLL6Q>1Yam=TOYAHAIPS;;3
+!s100 D<2VdB8g6Ch^R>JaQ[o;>1
+R7
+32
+R8
+!i10b 1
+R9
+Z44 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Components/memory.vhd|
+Z45 !s107 C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Components/memory.vhd|
+!i113 1
+R12
+R13
+Abehavior
+R41
+R1
+R2
+R3
+DEx4 work 6 memory 0 22 LL6Q>1Yam=TOYAHAIPS;;3
+l103
+L47
+V1DCPNg^4Ve^VZA`HEG>7`3
+!s100 D=ObgRBTNYCh6=23Y6SNe2
+R7
+32
+R8
+!i10b 1
+R9
+R44
+R45
+!i113 1
+R12
+R13
+Ememory_stage
+Z46 w1649904505
+R2
+R3
+R4
+Z47 8C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Stages/memory_stage.vhd
+Z48 FC:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Stages/memory_stage.vhd
+l0
+L4
+VVNzIXVIf[9JN4R`_IdeGO3
+!s100 eUbN@0<z`J4b@Ef4]mo`o3
+R7
+32
+R8
+!i10b 1
+R9
+Z49 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Stages/memory_stage.vhd|
+Z50 !s107 C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Stages/memory_stage.vhd|
+!i113 1
+R12
+R13
+Abehavior
+R2
+R3
+DEx4 work 12 memory_stage 0 22 VNzIXVIf[9JN4R`_IdeGO3
+l45
+L43
+VW[I2RZ3^il4l5R3W<4`bF3
+!s100 _056]`5YGXaeL>Rjll<Be3
+R7
+32
+R8
+!i10b 1
+R9
+R49
+R50
+!i113 1
+R12
+R13
+Epipelined_mips_processor_tb
+Z51 w1649860819
+R41
+R1
+R2
+R3
+R4
+Z52 8C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Test_Bench/Pipelined_MIPS_Processor_tb.vhd
+Z53 FC:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Test_Bench/Pipelined_MIPS_Processor_tb.vhd
+l0
+L7
+VcS6^SWIl6hUmjD`78>>mk1
+!s100 H=H8UBV9QTO0d_Gg9;e>81
+R7
+32
+R36
+!i10b 1
+R37
+Z54 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Test_Bench/Pipelined_MIPS_Processor_tb.vhd|
+Z55 !s107 C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Test_Bench/Pipelined_MIPS_Processor_tb.vhd|
+!i113 1
+R12
+R13
+Abehavior
+R41
+R1
+R2
+R3
+DEx4 work 27 pipelined_mips_processor_tb 0 22 cS6^SWIl6hUmjD`78>>mk1
+l90
+L10
+V5A^ZR5>K:MP:RXA4`fjj52
+!s100 W3mJM:>Mg0=2EeNkGPYcS1
+R7
+32
+R36
+!i10b 1
+R37
+R54
+R55
+!i113 1
+R12
+R13
+Eprocessor
+R28
+R41
+R1
+R2
+R3
+R4
+Z56 8C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Components/Processor.vhd
+Z57 FC:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Components/Processor.vhd
+l0
+L10
+VGgGD1WQm9E^IJ25`]II_X1
+!s100 Q2C=X^6MVo`^092@7cFo>3
+R7
+32
+R36
+!i10b 1
+R37
+Z58 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Components/Processor.vhd|
+Z59 !s107 C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Components/Processor.vhd|
+!i113 1
+R12
+R13
+Abehavior
+R41
+R1
+R2
+R3
+DEx4 work 9 processor 0 22 GgGD1WQm9E^IJ25`]II_X1
+l265
+L33
+VM]NOSKkON:<o[zcIA`Wd60
+!s100 JdBCL[VDc8`NoC5d9>c@K1
+R7
+32
+R36
+!i10b 1
+R37
+R58
+R59
+!i113 1
+R12
+R13
+Eregister_file
+Z60 w1649903481
+R1
+R2
+R3
+R4
+Z61 8C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Stages/register_file.vhd
+Z62 FC:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Stages/register_file.vhd
+l0
+L5
+VM<hKGc:;>0iPD3=E02=4V3
+!s100 2aZBbBNjK]XEbU]=U>L]@1
+R7
+32
+R8
+!i10b 1
+R9
+Z63 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Stages/register_file.vhd|
+Z64 !s107 C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Stages/register_file.vhd|
+!i113 1
+R12
+R13
+Aarch
+R1
+R2
+R3
+R26
+l26
+L21
+V3KO14aGQoJ:i6Z;ZRPXT]2
+!s100 _Y8bAF34VWk<UF5LcJe5]3
+R7
+32
+R8
+!i10b 1
+R9
+R63
+R64
+!i113 1
+R12
+R13
+Etwomux
+Z65 w1649709981
+R2
+R3
+R4
+Z66 8C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Components/TWOMUX.vhd
+Z67 FC:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Components/TWOMUX.vhd
+l0
+L4
+VzZLncg_bEW95j@oNILA<o2
+!s100 1MNzeo_B`;FBP`IToo3c32
+R7
+32
+R8
+!i10b 1
+R9
+Z68 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Components/TWOMUX.vhd|
+Z69 !s107 C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Components/TWOMUX.vhd|
+!i113 1
+R12
+R13
+Amux2
+R2
+R3
+DEx4 work 6 twomux 0 22 zZLncg_bEW95j@oNILA<o2
+l14
+L13
+VJce=9[oZUohBabl^]C4zm2
+!s100 kYfA:=L7`;RaiOdPXozAe0
+R7
+32
+R8
+!i10b 1
+R9
+R68
+R69
+!i113 1
+R12
+R13
+Ewriteback_stage
+Z70 w1649270971
+R2
+R3
+R4
+Z71 8C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Stages/writeback_stage.vhd
+Z72 FC:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Stages/writeback_stage.vhd
+l0
+L5
+VmNSCZYkbSH`:Y7cL]hTQ83
+!s100 I0;271EoYCE_4gNOJlEFC1
+R7
+32
+R8
+!i10b 1
+R9
+Z73 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Stages/writeback_stage.vhd|
+Z74 !s107 C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Stages/writeback_stage.vhd|
+!i113 1
+R12
+R13
+Abehavior
+R2
+R3
+DEx4 work 15 writeback_stage 0 22 mNSCZYkbSH`:Y7cL]hTQ83
+l43
+L30
+VF>Od0Vc=]mfcfC>i;hO_L3
+!s100 <k]>G;FDF`E?>ONkXizCA1
+R7
+32
+R8
+!i10b 1
+R9
+R73
+R74
+!i113 1
+R12
+R13

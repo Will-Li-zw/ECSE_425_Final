@@ -1,0 +1,101 @@
+{C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/executionStage/ADD.vhd} {1 {vcom -work work -2002 -explicit -stats=none {C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/executionStage/ADD.vhd}
+Model Technology ModelSim - Intel FPGA Edition vcom 10.5b Compiler 2016.10 Oct  5 2016
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Loading package NUMERIC_STD
+-- Compiling entity ADD
+-- Compiling architecture comb of ADD
+
+} {} {}} {C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Components/TWOMUX.vhd} {1 {vcom -work work -2002 -explicit -stats=none {C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Components/TWOMUX.vhd}
+Model Technology ModelSim - Intel FPGA Edition vcom 10.5b Compiler 2016.10 Oct  5 2016
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Compiling entity TWOMUX
+-- Compiling architecture mux2 of TWOMUX
+
+} {} {}} {C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Stages/fetch_stage.vhd} {1 {vcom -work work -2002 -explicit -stats=none {C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Stages/fetch_stage.vhd}
+Model Technology ModelSim - Intel FPGA Edition vcom 10.5b Compiler 2016.10 Oct  5 2016
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Loading package NUMERIC_STD
+-- Compiling entity fetch_stage
+-- Compiling architecture arch of fetch_stage
+
+} {} {}} {C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Components/Processor.vhd} {1 {vcom -work work -2002 -explicit -stats=none {C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Components/Processor.vhd}
+Model Technology ModelSim - Intel FPGA Edition vcom 10.5b Compiler 2016.10 Oct  5 2016
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Loading package NUMERIC_STD
+-- Loading package std_logic_textio
+-- Compiling entity Processor
+-- Compiling architecture behavior of Processor
+
+} {} {}} {C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Components/memory.vhd} {1 {vcom -work work -2002 -explicit -stats=none {C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Components/memory.vhd}
+Model Technology ModelSim - Intel FPGA Edition vcom 10.5b Compiler 2016.10 Oct  5 2016
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Loading package NUMERIC_STD
+-- Loading package std_logic_textio
+-- Compiling entity memory
+-- Compiling architecture behavior of memory
+
+} {} {}} {C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/executionStage/ALU.vhd} {1 {vcom -work work -2002 -explicit -stats=none {C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/executionStage/ALU.vhd}
+Model Technology ModelSim - Intel FPGA Edition vcom 10.5b Compiler 2016.10 Oct  5 2016
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Loading package NUMERIC_STD
+-- Compiling entity ALU
+-- Compiling architecture arith of ALU
+
+} {} {}} {C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Stages/memory_stage.vhd} {1 {vcom -work work -2002 -explicit -stats=none {C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Stages/memory_stage.vhd}
+Model Technology ModelSim - Intel FPGA Edition vcom 10.5b Compiler 2016.10 Oct  5 2016
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Compiling entity memory_stage
+-- Compiling architecture Behavior of memory_stage
+
+} {} {}} {C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Stages/register_file.vhd} {1 {vcom -work work -2002 -explicit -stats=none {C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Stages/register_file.vhd}
+Model Technology ModelSim - Intel FPGA Edition vcom 10.5b Compiler 2016.10 Oct  5 2016
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Loading package NUMERIC_STD
+-- Compiling entity register_file
+-- Compiling architecture arch of register_file
+
+} {} {}} {C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Test_Bench/Pipelined_MIPS_Processor_tb.vhd} {1 {vcom -work work -2002 -explicit -stats=none {C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Test_Bench/Pipelined_MIPS_Processor_tb.vhd}
+Model Technology ModelSim - Intel FPGA Edition vcom 10.5b Compiler 2016.10 Oct  5 2016
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Loading package NUMERIC_STD
+-- Loading package std_logic_textio
+-- Compiling entity Pipelined_MIPS_Processor_tb
+-- Compiling architecture behavior of Pipelined_MIPS_Processor_tb
+
+} {} {}} {C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Stages/decode_stage.vhd} {1 {vcom -work work -2002 -explicit -stats=none {C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Stages/decode_stage.vhd}
+Model Technology ModelSim - Intel FPGA Edition vcom 10.5b Compiler 2016.10 Oct  5 2016
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Loading package NUMERIC_STD
+-- Compiling entity decode_stage
+-- Compiling architecture Behavioral of decode_stage
+-- Loading entity register_file
+
+} {} {}} {C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Stages/writeback_stage.vhd} {1 {vcom -work work -2002 -explicit -stats=none {C:/Users/chang/Desktop/MyCoursesWin/ECSE 425/ECSE_425_Final/Pipelined_Processor/Stages/writeback_stage.vhd}
+Model Technology ModelSim - Intel FPGA Edition vcom 10.5b Compiler 2016.10 Oct  5 2016
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Compiling entity writeback_stage
+-- Compiling architecture Behavior of writeback_stage
+
+} {} {}}
