@@ -87,7 +87,7 @@ begin
     variable shamt : std_logic_vector(4 downto 0);
     variable funct : std_logic_vector(5 downto 0);
     begin
-        if rising_edge(clk) then
+        if falling_edge(clk) then
             if last_stall = '1' then
                 -- cur_instruction <= last_instruction;
                 last_stall <= '0';

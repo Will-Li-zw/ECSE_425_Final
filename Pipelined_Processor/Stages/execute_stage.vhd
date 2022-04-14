@@ -58,6 +58,7 @@ entity execute_stage is
 
         -- TODO: if_branch signal is not generated
         -- if_branch : out std_logic;
+        -- branch_addr : out std_logic_vector(31 downto 0);
         
         -- control outputs (TODO: may not be complete)
         reg_file_enable_out : out std_logic;
