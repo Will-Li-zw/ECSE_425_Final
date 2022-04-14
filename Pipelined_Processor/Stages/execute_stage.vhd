@@ -170,8 +170,8 @@ BEGIN
     -- TODO: Zichen: I changed the "reg_file_enable_out_buffer" to "reg_address_buffer"...
     -- TODO? why we are using twomux_sel here?????
 	WITH reg_sel select reg_address_buffer <=        
-			rd WHEN '0', -- R type instruction, use rd in WB
-			rt WHEN '1', -- I type instruction, use rt in MEM
+			rd WHEN '1', -- R type instruction, use rd in WB
+			rt WHEN '0', -- I type instruction, use rt in MEM
 			(others => 'X') WHEN others;
             
     read_data_2_out_buffer <= read_data_2;

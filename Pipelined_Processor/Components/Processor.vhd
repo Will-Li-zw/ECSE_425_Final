@@ -49,8 +49,7 @@ architecture behavior of Processor is
         branch_addr : in std_logic_vector (bit_width-1 downto 0):=(others=>'0'); -- TODO: from execute stage
         -- output
         pc          : out std_logic_vector (bit_width-1 downto 0) := (others => '0');  -- all initalize to 0s
-        pc_next     : out std_logic_vector (bit_width-1 downto 0) := (others => '0');
-        mem_output  : out std_logic
+        pc_next     : out std_logic_vector (bit_width-1 downto 0) := (others => '0')
     );
 	end component;
 
@@ -234,7 +233,6 @@ architecture behavior of Processor is
 	signal decode_execute_rs_data: std_logic_vector(word_size-1 downto 0);	 -- rs data DECODE->EXE
 	signal decode_execute_rt_data: std_logic_vector(word_size-1 downto 0);   -- rt data DECODE->EXE
 	signal decode_execute_imme_data 	: std_logic_vector(word_size-1 downto 0);   -- immediate value DECODE->EXE
-	signal decode_fetch_jump_addr		: std_logic_vector(word_size-1 downto 0);   -- jump addr DECODE->FETCH
 	signal decode_execute_branch_addr	: std_logic_vector(word_size-1 downto 0);	-- branch addr DECODE->EXECUTE
 	signal decode_execute_reg_write		: std_logic;	-- write register control DECODE->EXECUTE
 	signal decode_execute_reg_dst		: std_logic;	-- TODO: maybe not useful
@@ -269,7 +267,7 @@ architecture behavior of Processor is
 	signal mem_wb_reg_enable		: std_logic;	-- carried signal for WB to write register	DEC->...->DEC
 	signal mem_wb_mem_to_reg		: std_logic;	-- carried signal for WB to select data to writeback DEC->...->WB
     signal forwarding_mem_exe_reg_data : std_logic_vector(word_size-1 downto 0);
-    signal forwarding_mem_exe_reg_addr : std_logic_vector(word_size-1 downto 0);
+    signal forwarding_mem_exe_reg_addr : std_logic_vector(4 downto 0);
 
     signal CPU_finished             : std_logic;
 
@@ -288,11 +286,19 @@ begin
 		branch_addr    => ex_branch_addr,
 
 		pc             => inst_addr,
-		pc_next        => pc_out_fetch_decode,
-        mem_output     => CPU_finished
+		pc_next        => pc_out_fetch_decode
    );
 
-   mem_output <= CPU_finished;
+   Instruction_end_of_file : process(instruction, clock)
+   begin
+        if(instruction = "UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU") then    -- if instruction meet the end of file
+            CPU_finished <= '1' after 5 ns;     -- wait for the last instruction to finish
+        else 
+            CPU_finished <= '0';
+        end if;
+   end process;
+   mem_output <= CPU_finished;                 -- output to the memory unit
+
 
    decoder : decode_stage
    port map(
@@ -318,7 +324,7 @@ begin
 		rs_data   => decode_execute_rs_data,	  
 		rt_data   => decode_execute_rt_data,     
 		imm_32    => decode_execute_imme_data,	  
-		jump_addr => decode_fetch_jump_addr,
+		jump_addr => de_jump_addr,
 		branch_addr => decode_execute_branch_addr,
 
 		-------- CTRL signals --------

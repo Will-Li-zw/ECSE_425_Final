@@ -48,7 +48,7 @@ ARCHITECTURE behavior OF memory IS
 	TYPE INST_MEM IS ARRAY(inst_ram_size-1 downto 0) OF STD_LOGIC_VECTOR(byte_size-1 DOWNTO 0);
 	TYPE DATA_MEM IS ARRAY(data_ram_size-1 downto 0) OF STD_LOGIC_VECTOR(byte_size-1 DOWNTO 0);
 	
-	SIGNAL inst_ram_block: INST_MEM := (others=>(others=>'0'));   -- Initialize instruction memory to 0s
+	SIGNAL inst_ram_block: INST_MEM := (others=>(others=>'U'));   -- Initialize instruction memory to Us, not meaningful
 	SIGNAL data_ram_block: DATA_MEM := (others=>(others=>'0'));   -- Initialize data memory to 0s
 
 	SIGNAL read_inst_addr_reg: INTEGER RANGE 0 to inst_ram_size-1;
@@ -71,6 +71,9 @@ ARCHITECTURE behavior OF memory IS
 		file_open(f, instruction_filepath, read_mode);
 		L1: while i < inst_ram_size-1 loop		
 			readline(f, aline);
+			if (endfile(f)) then				-- if reached EOF, exit loop early
+				exit L1;
+			end if;
 			read(aline, instruction);
 			-- parse instruction into 4 parts
 			mem(i) <= instruction(7 downto 0);	-- NOTE: because I assign the signal, it needs to be defined as OUT signal in paramter
@@ -78,9 +81,7 @@ ARCHITECTURE behavior OF memory IS
 			mem(i+2) <= instruction(23 downto 16);
 			mem(i+3) <= instruction(31 downto 24);
 			i := i+4;	-- update counter by a word
-			if (endfile(f)) then				-- if reached EOF, exit loop early
-				exit L1;
-			end if;
+			
 		end loop;
 		file_close(f);
 	end load_instruction_from_file;

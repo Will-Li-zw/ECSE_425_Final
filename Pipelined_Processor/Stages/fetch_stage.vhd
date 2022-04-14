@@ -18,8 +18,8 @@ entity fetch_stage is
         branch_addr : in std_logic_vector (bit_width-1 downto 0):=(others=>'0'); -- TODO: from execute stage
         -- output
         pc          : out std_logic_vector (bit_width-1 downto 0) := (others => '0');  -- all initalize to 0s
-        pc_next     : out std_logic_vector (bit_width-1 downto 0) := (others => '0');
-        mem_output  : out std_logic -- control logic for judging when CPU has finished
+        pc_next     : out std_logic_vector (bit_width-1 downto 0) := (others => '0')
+        -- mem_output  : out std_logic -- control logic for judging when CPU has finished
     );
 end fetch_stage;
 
@@ -36,7 +36,6 @@ begin
         if (reset='1') then
             pc_next_register <= 0;
             pc_register <= 0;
-            mem_output <= '0';
         elsif (rising_edge(clock)) then
             if (if_branch='1') then
                 pc_register <= to_integer( unsigned(branch_addr) );
@@ -45,9 +44,8 @@ begin
                 pc_register <= to_integer( unsigned(jump_addr) );
                 pc_next_register <= to_integer( unsigned(jump_addr) )+4;
             elsif (pc_register+4 >= inst_ram_size-1) then   -- if pipeline goes to end of instruction mem, stop it
+                -- pc_register doesn't change
                 pc_next_register <= pc_register;    
-                mem_output <= '1' after 5 ns;              -- output the data memory only when all program finished
-                                                           -- after 5 CC to wait for all instruction finished to WB stage
             elsif (stall='1') then
                 -- pc_next_register <= pc_register;   do not update pc_register NOR pc_next_register
             else
