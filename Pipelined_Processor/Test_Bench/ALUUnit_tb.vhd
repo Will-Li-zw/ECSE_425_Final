@@ -133,10 +133,17 @@ begin
 
         wait for clk_period;
 
-        
+        report "Test7: Test set less than";
+        input1 <= x"00000006";
+        input2 <= x"00000002";
+        ALU_ctl<= 5;
+        wait until rising_edge(clk); 
+        assert zero = x"00000000" report "Test6: Failed, ALU output not correct" severity error;
+
+        wait for clk_period;
         -- finish;
 
-        
+        wait;
 
     end process;
 	
