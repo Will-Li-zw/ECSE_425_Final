@@ -148,8 +148,8 @@ architecture behavior of Processor is
 		ALUresult : out signed(31 downto 0);
         hi : out signed(31 downto 0);
         lo : out signed(31 downto 0);
-        -- TODO: if_branch signal is not generated
-        -- if_branch : out std_logic;
+
+        if_branch : out std_logic;
         -- control outputs (TODO: may not be complete)
         reg_file_enable_out : out std_logic;
         mem_to_reg_flag_out : out std_logic;
@@ -377,6 +377,9 @@ begin
 		std_logic_vector(ALUresult) 		=> exe_alu_result,
         std_logic_vector(hi) 				=> exe_hi,
         std_logic_vector(lo) 				=> exe_lo,
+
+        -- branching output signals
+        if_branch => ex_if_branch,
         
         -- control outputs (TODO: may not be complete)
         reg_file_enable_out	 	=> exe_mem_reg_file_enable,
