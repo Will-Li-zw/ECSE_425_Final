@@ -16,8 +16,8 @@ entity execute_stage is
         pc_plus_4 : in std_logic_vector(31 downto 0);   -- carried pc_next value from FET->DEC->EXE->...
         
         -- reg address
+        reg_sel : in std_logic; -- if 0, then pass on rd (R), else, pass on rt (I)
         rt : in std_logic_vector(4 downto 0); 
-        rs : in std_logic_vector(4 downto 0); -- TODO: may not need??
         rd : in std_logic_vector(4 downto 0);
         
         -- control inputs:
@@ -25,10 +25,10 @@ entity execute_stage is
 
 
         -- TODO: what are the meaning of these signals
-		-- reg_file_enable_in : in std_logic;
-        -- mem_to_reg_flag_in : in std_logic;
-        -- mem_write_request_in : in std_logic;
-        -- mem_read_request_in : in std_logic;
+		reg_file_enable_in : in std_logic;
+        mem_to_reg_flag_in : in std_logic;
+        mem_write_request_in : in std_logic;
+        mem_read_request_in : in std_logic;
 
         -- forwarding inputs:
         mem_exe_reg_data    : in signed(31 downto 0);                       -- account for MEM->EXE forwarding
@@ -63,7 +63,7 @@ entity execute_stage is
         reg_file_enable_out : out std_logic;
         mem_to_reg_flag_out : out std_logic;
         mem_write_request_out : out std_logic;
-        meme_read_request_out : out std_logic
+        mem_read_request_out : out std_logic
 	);
 end execute_stage;
 
@@ -84,7 +84,7 @@ SIGNAL lo_buffer : signed(31 downto 0);
 SIGNAL reg_file_enable_out_buffer : std_logic;
 SIGNAL mem_to_reg_flag_out_buffer : std_logic;
 SIGNAL mem_write_request_out_buffer : std_logic;
-SIGNAL meme_read_request_out_buffer : std_logic;
+SIGNAL mem_read_request_out_buffer : std_logic;
 
 
 COMPONENT TWOMUX IS
@@ -158,7 +158,7 @@ BEGIN
             reg_file_enable_out     <= reg_file_enable_out_buffer;
             mem_to_reg_flag_out     <= mem_to_reg_flag_out_buffer;
             mem_write_request_out   <= mem_write_request_out_buffer;
-            meme_read_request_out   <= meme_read_request_out_buffer;
+            mem_read_request_out   <= mem_read_request_out_buffer;
             
 		END IF;
 	END process; -- end process
@@ -168,9 +168,15 @@ BEGIN
 
     -- TODO: Zichen: I changed the "reg_file_enable_out_buffer" to "reg_address_buffer"...
     -- TODO? why we are using twomux_sel here?????
-	WITH twomux_sel select reg_address_buffer <=        
+	WITH reg_sel select reg_address_buffer <=        
 			rd WHEN '0', -- R type instruction, use rd in WB
 			rt WHEN '1', -- I type instruction, use rt in MEM
 			(others => 'X') WHEN others;
-
+            
+    read_data_2_out_buffer <= read_data_2;
+	reg_file_enable_out_buffer <= reg_file_enable_in;
+	mem_to_reg_flag_out_buffer <= mem_to_reg_flag_in;
+    mem_write_request_out_buffer <= mem_write_request_in;
+    mem_read_request_out_buffer <= mem_read_request_in;
+    
 END exe; -- end architecture
