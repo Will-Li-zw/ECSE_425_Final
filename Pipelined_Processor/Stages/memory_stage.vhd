@@ -31,7 +31,12 @@ entity memory_stage is
         reg_file_enable_out: out std_logic;
         mem_to_reg_flag_out: out std_logic;
         mem_write_request_out: out std_logic;
-        mem_read_request_out: out std_logic
+        mem_read_request_out: out std_logic;
+
+        -- * Forwarding control * --          
+        -- forwarding outputs:
+        forwarding_mem_exe_reg_data : out std_logic_vector(word_width-1 downto 0);  -- MEM->EX forwarding, across one inst
+        forwarding_mem_exe_reg_addr : out std_logic_vector(4 downto 0)
     );
 end memory_stage;
 
