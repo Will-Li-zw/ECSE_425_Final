@@ -183,7 +183,12 @@ architecture behavior of Processor is
         reg_file_enable_out: out std_logic;
         mem_to_reg_flag_out: out std_logic;
         mem_write_request_out: out std_logic;
-        mem_read_request_out: out std_logic
+        mem_read_request_out: out std_logic;
+
+        -- * Forwarding control * --          
+        -- forwarding outputs:
+        forwarding_mem_exe_reg_data : out std_logic_vector(word_width-1 downto 0);  -- MEM->EX forwarding, across one inst
+        forwarding_mem_exe_reg_addr : out std_logic_vector(4 downto 0)
     );
 	end component;
 
@@ -263,7 +268,8 @@ architecture behavior of Processor is
 
 	signal mem_wb_reg_enable		: std_logic;	-- carried signal for WB to write register	DEC->...->DEC
 	signal mem_wb_mem_to_reg		: std_logic;	-- carried signal for WB to select data to writeback DEC->...->WB
-
+    signal forwarding_mem_exe_reg_data : std_logic_vector(word_size-1 downto 0);
+    signal forwarding_mem_exe_reg_addr : std_logic_vector(word_size-1 downto 0);
 
     signal CPU_finished             : std_logic;
 
@@ -409,7 +415,10 @@ begin
         reg_file_enable_out		=> mem_wb_reg_enable,
         mem_to_reg_flag_out		=> mem_wb_mem_to_reg,
         mem_write_request_out	=> datawrite_req,	-- direct output of Processor: data write request
-        mem_read_request_out	=> dataread_req		-- direct output of Processor: data read request
+        mem_read_request_out	=> dataread_req,		-- direct output of Processor: data read request
+
+        forwarding_mem_exe_reg_data => forwarding_mem_exe_reg_data,
+        forwarding_mem_exe_reg_addr => forwarding_mem_exe_reg_addr
    	);
 
 	writer	: writeback_stage

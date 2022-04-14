@@ -53,12 +53,16 @@ begin
             mem_read_request_out <= mem_read_request_in;
 
             -- passing memory data and address 
-            mem_addr_out <= alu_result_in; -- note that this may not be an address, if it isn't, control signals prevent such interpretation
+            mem_addr_out <= alu_result_in; -- NOTE: that this may not be an address, if it isn't, control signals prevent such interpretation
             mem_write_data_out <= mem_write_data_in;    -- for STORE instruction to modify memory
 
             -- passing register data and address for writeback
             alu_result_out <= alu_result_in; -- similarly this may not be a result for writeback
             reg_write_addr_out <= reg_write_addr_in;
+
+            -- handling forwarding
+            forwarding_mem_exe_reg_addr <= reg_write_addr_in;
+            forwarding_mem_exe_reg_data <= alu_result_in;
         end if;
     end process;
 
