@@ -20,6 +20,9 @@ entity decode_stage is
         w_enable : in std_logic;
 
         mem_reg : in std_logic_vector(4 downto 0);
+
+        -- output request signal:
+        reg_output: in std_logic;
         
 
         rs_addr : out std_logic_vector(4 downto 0);
@@ -73,6 +76,8 @@ begin
         w_reg => w_addr,
         w_enable => w_enable,
         w_data => w_data,
+
+        regoutput   => reg_output,
 
         -- output signals
         r_data1 => rs_data,

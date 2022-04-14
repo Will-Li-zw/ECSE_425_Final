@@ -27,7 +27,9 @@ component Processor is
         dataread_req	: out std_logic;
 		inst_addr       : out std_logic_vector(word_size-1 downto 0);
         data_addr       : out std_logic_vector(word_size-1 downto 0);
-        write_data  	: out std_logic_vector(word_size-1 downto 0)
+        write_data  	: out std_logic_vector(word_size-1 downto 0);
+
+        mem_output  : out std_logic
 	);
 end component;
 
@@ -106,7 +108,9 @@ begin
         dataread_req => dataread_req,   -- request to read DATAMEM
         inst_addr => inst_addr,    -- instruction read target
         data_addr => data_addr,    -- data read target
-        write_data  => write_data       -- provided data to write to memory: eg. STORE instruciton
+        write_data  => write_data,       -- provided data to write to memory: eg. STORE instruciton
+
+        mem_output => m_output
     );
 
  
@@ -153,7 +157,7 @@ begin
 
 
 
-        wait;
+        wait;                   -- wait for program to run
 
     end process;
 	

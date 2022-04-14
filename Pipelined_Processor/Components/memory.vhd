@@ -89,10 +89,10 @@ ARCHITECTURE behavior OF memory IS
 	procedure output_data_to_file (mem : DATA_MEM) is
 		file     	f  : text;
 		variable aline : line;
-		variable i: integer range 0 to inst_ram_size+4 := 0;	-- loop counter
+		variable i: integer range 0 to data_ram_size+4 := 0;	-- loop counter
 	begin
 		file_open(f, dataoutput_filepath, write_mode);
-		L1: while i < inst_ram_size-1 loop
+		L1: while i < data_ram_size-1 loop
 			write(aline, mem(i+3) & mem(i+2) & mem(i+1) & mem(i));		-- pass content of aline
 			writeline(f, aline);		-- put line into the output file
 			i := i+4;					-- update counter by 4(a word offset)
@@ -155,7 +155,6 @@ BEGIN
 
 		END IF;
 	END PROCESS;
-	-- readdata <= ram_block(read_address_reg);				TODO: why put this line outside of process?
 
 
 	--The waitrequest signal is used to vary response time in simulation
