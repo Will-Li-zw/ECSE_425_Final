@@ -28,10 +28,10 @@ architecture arch of register_file is
         r_data1 <= r(to_integer(unsigned(r_reg1)));
         r_data2 <= r(to_integer(unsigned(r_reg2)));
 
-        process(clk_rf, reset)
+        process(clk_rf, reset, w_enable)
             begin
             -- if there is a rising edge    
-            if rising_edge(clk_rf) then
+            if (clk_rf='1') then
                 if reset = '1' then -- check the reset signal
                     r <= (others=>(others=>'0'));
                 else
@@ -40,5 +40,7 @@ architecture arch of register_file is
                     end if;
                 end if;
             end if;
-    end process;
+        end process;
+
+        -- r(to_integer(unsigned(w_reg))) <= w_data when w_enable = '1';
 end arch;
