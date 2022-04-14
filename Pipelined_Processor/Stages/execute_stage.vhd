@@ -56,9 +56,8 @@ entity execute_stage is
         hi : out signed(31 downto 0);
         lo : out signed(31 downto 0);
 
-        -- TODO: if_branch signal is not generated
-        -- if_branch : out std_logic;
-        -- branch_addr : out std_logic_vector(31 downto 0);
+        -- branching output signals
+        if_branch : out std_logic;
         
         -- control outputs (TODO: may not be complete)
         reg_file_enable_out : out std_logic;
@@ -87,6 +86,23 @@ SIGNAL mem_to_reg_flag_out_buffer : std_logic;
 SIGNAL mem_write_request_out_buffer : std_logic;
 SIGNAL mem_read_request_out_buffer : std_logic;
 
+-- for forwarding logic: option 0 means no forwarding, 1 means forward father's result, 2 means forward grandpa's result
+SIGNAL op1_option : integer range 0 to 3 := 0;
+SIGNAL op2_option : integer range 0 to 3 := 0;
+SIGNAL grandpa_rd : std_logic_vector(4 downto 0) := (others => 'U'); -- previous previous instruction's destination
+SIGNAL father_rd : std_logic_vector(4 downto 0) := (others => 'U'); -- previous instruction's destination
+SIGNAL grandpa_result : std_logic_vector(31 downto 0) := (others => 'U'); -- previous previous instruction's ALU result
+SIGNAL father_result : std_logic_vector(31 downto 0) := (others => 'U'); -- previous instruction's ALU result
+
+COMPONENT THREEMUX IS -- for forward logic
+	port (
+			sel : IN integer range 0 to 3;
+			input0 : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
+			input1 : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
+            input2 : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
+			output : OUT STD_LOGIC_VECTOR (31 DOWNTO 0)
+    );
+END COMPONENT;
 
 COMPONENT TWOMUX IS
 	port (
@@ -102,6 +118,7 @@ COMPONENT ALU IS
 			data1 : IN SIGNED(31 DOWNTO 0);
 			op2 : IN SIGNED (31 DOWNTO 0); -- output from a 2MUX (either data2 or instruct(15 downto 0))
 			ALUcontrol : IN INTEGER range 0 to 26; --sequential encoding based on page 2 of the pdf
+            extended_imm : in SIGNED(31 downto 0); -- for shift instruction, lower 16 bits (sign/zero extended to 32)
 
 			ALUresult : OUT SIGNED(31 DOWNTO 0);
             hi : OUT SIGNED(31 DOWNTO 0);
@@ -121,6 +138,22 @@ COMPONENT ADD IS
 END COMPONENT;
 
 BEGIN
+
+    -- TODO: forward muxs
+	-- cmpnt_fwd1_threemux: THREEMUX port map( -- for choosing first ALU operand
+	-- 	sel             => twomux_sel,
+    --     input0          => std_logic_vector(read_data_2),        -- to match type
+    --     input1          => std_logic_vector(extended_lower_15_bits),
+    --     signed(output)  => muxout
+	-- );
+    
+	-- cmpnt_fwd2_threemux: THREEMUX port map( -- for choosing second ALU operand
+	-- 	sel             => twomux_sel,
+    --     input0          => std_logic_vector(read_data_2),        -- to match type
+    --     input1          => std_logic_vector(extended_lower_15_bits),
+    --     signed(output)  => muxout
+	-- );
+
 	cmpnt_twomux: TWOMUX port map(
 		sel             => twomux_sel,
         input0          => std_logic_vector(read_data_2),        -- to match type
@@ -132,6 +165,7 @@ BEGIN
 		data1 => read_data_1,      -- TODO: For implementing forwarding, we need to change the port mapped data
         op2 => muxout,
         ALUcontrol => ALUcontrol,
+        extended_imm => extended_lower_15_bits,
         ALUresult => ALUresult_buffer,
         hi => hi_buffer,
         lo => lo_buffer,
@@ -144,6 +178,37 @@ BEGIN
         Addresult                       => Addresult_buffer,
         std_logic_vector(pc_plus_4_out) => pc_plus_4_out_buffer
 	);
+
+    Branch: PROCESS(ALUcontrol, read_data_1, read_data_2, clk) -- JUMP is done in decode stage
+    BEGIN
+        if rising_edge(clk) then
+            CASE ALUcontrol IS
+                WHEN 22 => -- beq
+                    IF read_data_1 = read_data_2 THEN
+                        if_branch <= '1';
+                    ELSE if_branch <= '0';
+                    END IF;
+                WHEN 23 => -- bne
+                    IF read_data_1 = read_data_2 THEN
+                        if_branch <= '1';
+                    ELSE if_branch <= '0';
+                    END IF;
+                WHEN Others =>
+                    if_branch <= '0';
+            END CASE;
+        end if;
+    END PROCESS;
+
+    forwarding: PROCESS(clk)
+    BEGIN
+    	IF (ALUcontrol /= 24) and (ALUcontrol /= 26) THEN -- possibe forwarding
+        	IF reg_sel = '0' THEN -- R type instruction
+                null; -- TODO
+            ELSE -- I type instruction
+            	null; -- TODO
+            END IF;
+        END IF;
+    END PROCESS;
 	
 	PROCESS(clk) 
 	BEGIN
