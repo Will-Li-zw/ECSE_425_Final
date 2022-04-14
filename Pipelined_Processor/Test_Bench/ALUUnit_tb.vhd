@@ -17,6 +17,7 @@ component ALU is
 			ALUresult : OUT SIGNED(31 DOWNTO 0);
             hi : OUT SIGNED(31 DOWNTO 0);
 			lo : OUT SIGNED(31 DOWNTO 0);
+
 			zero : OUT STD_LOGIC
        );
 end component;
@@ -75,6 +76,64 @@ begin
 
         wait for clk_period;
 
+        report "Test2: Test 2-1 = 1";
+        input1 <= x"00000002";
+        input2 <= x"00000001";
+        ALU_ctl<= 1;
+        wait until rising_edge(clk);    
+        assert ALU_res = x"00000001" report "Test2: Failed, ALU output not correct" severity error;
+
+        wait for clk_period;
+
+        report "Test3: Test 2+3 Immediate";
+        input1 <= x"00000002";
+        input2 <= x"00000003";
+        ALU_ctl<= 2;
+        wait until rising_edge(clk);    
+        assert ALU_res = x"00000005" report "Test3: Failed, ALU output not correct" severity error;
+
+        wait for clk_period;
+
+        report "Test4: Test 2*3 = 6";
+        input1 <= x"00000002";
+        input2 <= x"00000003";
+        ALU_ctl<= 3;
+        wait until rising_edge(clk); 
+        assert lo_tst = x"00000006" report "Test4: Failed, ALU output not correct" severity error;
+
+        wait for clk_period;
+      
+        report "Test5: Test for large value multi";
+        input1 <= x"ffffffff";
+        input2 <= x"ffffffff";
+        ALU_ctl<= 3;
+        wait until rising_edge(clk); 
+        assert lo_tst = x"00000000" report "Test5 low: Failed, ALU output not correct" severity error;
+        assert hi_tst = x"FFFFFFFE" report "Test5 high: Failed, ALU output not correct" severity error;
+
+        wait for clk_period;
+      
+        report "Test6: Test 6/2 = 3";
+        input1 <= x"00000006";
+        input2 <= x"00000002";
+        ALU_ctl<= 4;
+        wait until rising_edge(clk); 
+        assert lo_tst = x"00000003" report "Test6: Failed, ALU output not correct" severity error;
+        assert hi_tst = x"00000000" report "Test6: Failed, ALU output not correct" severity error;
+
+        wait for clk_period;
+
+        report "Test6: Test 7/2 = 3.....1";
+        input1 <= x"00000006";
+        input2 <= x"00000002";
+        ALU_ctl<= 4;
+        wait until rising_edge(clk); 
+        assert lo_tst = x"00000003" report "Test6: Failed, ALU output not correct" severity error;
+        assert hi_tst = x"00000001" report "Test6: Failed, ALU output not correct" severity error;
+
+        wait for clk_period;
+
+        
         -- finish;
 
         
