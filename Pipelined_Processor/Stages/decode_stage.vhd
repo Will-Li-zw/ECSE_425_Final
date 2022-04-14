@@ -32,7 +32,6 @@ entity decode_stage is
         rt_data : out std_logic_vector(reg_adrsize-1 downto 0); -- contents of rt
         imm_32 : out std_logic_vector(reg_adrsize-1 downto 0);  -- sign extended immediate value
         jump_addr : out std_logic_vector(reg_adrsize-1 downto 0);
-        branch_addr : out std_logic_vector(reg_adrsize-1 downto 0);
 
         -------- CTRL signals --------
         -- whether to stall the fetch
@@ -57,7 +56,6 @@ end entity;
 architecture Behavioral of decode_stage is
     signal imm_16 : std_logic_vector(15 downto 0);
     signal jump_addr_s : std_logic_vector(25 downto 0);
-    signal branch_addr_s : std_logic_vector(25 downto 0);
     signal rs_s : std_logic_vector(4 downto 0);
     signal rt_s : std_logic_vector(4 downto 0);
     signal ctrl_sigs : std_logic_vector(ctrl_size-1 downto 0);
@@ -106,7 +104,6 @@ begin
                 
                 imm_16 <= last_instruction(15 downto 0);  -- immediate value
                 jump_addr_s <= last_instruction(25 downto 0);
-                branch_addr_s <= last_instruction(25 downto 0);
             else
                 -- cur_instruction <= instruction_in;
                 opcode := instruction_in(31 downto 26);
@@ -118,7 +115,6 @@ begin
 
                 imm_16 <= instruction_in(15 downto 0);  -- immediate value
                 jump_addr_s <= instruction_in(25 downto 0);
-                branch_addr_s <= instruction_in(25 downto 0);
             end if;
 
             rs_s <= rs;
@@ -164,11 +160,11 @@ begin
             elsif opcode = "000010" then  -- 24. j
                 alu_op <= 24;
                 jump_addr <= std_logic_vector(resize(unsigned(jump_addr_s), jump_addr'length));
-                ctrl_sigs <= "00000100";      
+                ctrl_sigs <= "0U000100";      
             elsif opcode = "000011" then  -- 26. jal
                 alu_op <= 26;   
                 jump_addr <= std_logic_vector(resize(unsigned(jump_addr_s), jump_addr'length));
-                ctrl_sigs <= "00000100";
+                ctrl_sigs <= "0U000100";
                 
             -------------------- I-instruction--------------------
             else
@@ -212,11 +208,9 @@ begin
                     ctrl_sigs <= "00000011";
                 elsif opcode = "000100" then  -- 22. beq
                     alu_op <= 22;
-                    branch_addr <= std_logic_vector(resize(unsigned(branch_addr_s), branch_addr'length));
                     ctrl_sigs <= "00001000";
                 elsif opcode = "000101" then  -- 23. bne
                     alu_op <= 23;
-                    branch_addr <= std_logic_vector(resize(unsigned(branch_addr_s), branch_addr'length));
                     ctrl_sigs <= "00001000";
                 else 
                     ctrl_sigs <= "00000000";
