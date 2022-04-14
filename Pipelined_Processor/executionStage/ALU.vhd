@@ -5,8 +5,9 @@ use ieee.numeric_std.all;
 ENTITY ALU IS
 	PORT(
 			data1 : IN SIGNED(31 DOWNTO 0);
-			op2 : IN SIGNED (31 DOWNTO 0); -- output from a 2MUX (either data2 or instruct(15 downto 0))
-			ALUcontrol : IN INTEGER range 0 to 26; --sequential encoding based on page 2 of the pdf
+			op2 : IN SIGNED (31 DOWNTO 0); -- output from a 2MUX (either data2 or extended instruct(15 downto 0))
+			ALUcontrol : IN INTEGER range 0 to 26; -- sequential encoding based on page 2 of the pdf
+			extended_imm : in SIGNED(31 downto 0); -- for shift instructions' shamt, lower 16 bits (sign/zero extended to 32)
 
 			ALUresult : OUT SIGNED(31 DOWNTO 0);
             hi : OUT SIGNED(31 DOWNTO 0);
@@ -134,8 +135,8 @@ BEGIN
                 
 			WHEN 17 => -- sll (shift left logical)
 				report "The value of 'ALUcontrol' is " & integer'image(ALUcontrol);
-                ALUresult_buffer <= signed( shift_left(unsigned(data1), to_integer(op2)) );
-                if (shift_left(unsigned(data1), to_integer(op2)))=0 then
+                ALUresult_buffer <= signed( shift_left(unsigned(op2), to_integer(extended_imm(10 downto 6))) );
+                if (shift_left(unsigned(op2), to_integer(extended_imm(10 downto 6))))=0 then
 					zero <= '1';
 				else
 					zero <= '0';
@@ -143,8 +144,8 @@ BEGIN
 
 			WHEN 18 => -- srl (shift right logical)
 				report "The value of 'ALUcontrol' is " & integer'image(ALUcontrol);
-                ALUresult_buffer <= signed( shift_right(unsigned(data1), to_integer(op2)) );
-                if shift_right(unsigned(data1), to_integer(op2))=0 then
+                ALUresult_buffer <= signed( shift_right(unsigned(op2), to_integer(extended_imm(10 downto 6))) );
+                if shift_right(unsigned(op2), to_integer(extended_imm(10 downto 6)))=0 then
 					zero <= '1';
 				else
 					zero <= '0';
@@ -152,8 +153,8 @@ BEGIN
 
 			WHEN 19 => -- sra
 				report "The value of 'ALUcontrol' is " & integer'image(ALUcontrol);
-                ALUresult_buffer <= shift_right(data1, to_integer(op2));
-				if shift_right(data1, to_integer(op2)) = 0 then
+                ALUresult_buffer <= shift_right(op2, to_integer(extended_imm(10 downto 6)));
+				if shift_right(op2, to_integer(extended_imm(10 downto 6))) = 0 then
 					zero <= '1';
 				else
 					zero <= '0';
@@ -173,35 +174,33 @@ BEGIN
 					zero <= '0';
 				end if;
                 
-			WHEN 22 => -- beq (Adder computes new relative PC address(TODO), ALU determines if equal)
+			WHEN 22 => -- beq (ALU computes new relative PC address, execute_stage.vhd determines if equal)
 				report "The value of 'ALUcontrol' is " & integer'image(ALUcontrol);
-				-- TODO: Same as sub?
-				ALUresult_buffer <= data1 - op2;
-				if data1-op2 = 0 then
+				ALUresult_buffer <= op2; -- op2 is branch_address, this value to be added to (PC + 4) in execute_stage.vhd
+				if op2 = 0 then
 					zero <= '1';
 				else
 					zero <= '0';
 				end if;
                 
-			WHEN 23 => -- bne
+			WHEN 23 => -- bne (ALU computes new relative PC address, execute_stage.vhd determines if equal)
 				report "The value of 'ALUcontrol' is " & integer'image(ALUcontrol);
-                -- TODO: Same as sub?
-				ALUresult_buffer <= data1 - op2;
-				if data1-op2 = 0 then
+				ALUresult_buffer <= op2; -- op2 is branch_address, this value to be added to (PC + 4) in execute_stage.vhd
+				if op2 = 0 then
 					zero <= '1';
 				else
 					zero <= '0';
 				end if;
                 
-			WHEN 24 => -- j (taken cared in decode)
+			WHEN 24 => -- j (taken cared in decode stage)
 				report "The value of 'ALUcontrol' is " & integer'image(ALUcontrol);
                 null;
                 
-			WHEN 25 => -- jr (taken cared in decode)
+			WHEN 25 => -- jr (taken cared in decode stage)
 				report "The value of 'ALUcontrol' is " & integer'image(ALUcontrol);
                 null;
                 
-			WHEN 26 => -- jal (taken cared in decode)
+			WHEN 26 => -- jal (taken cared in decode stage)
 				report "The value of 'ALUcontrol' is " & integer'image(ALUcontrol);
                 null;
                 
