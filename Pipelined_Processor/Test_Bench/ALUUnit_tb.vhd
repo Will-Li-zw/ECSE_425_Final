@@ -124,7 +124,7 @@ begin
         wait for clk_period;
 
         report "Test6: Test 7/2 = 3.....1";
-        input1 <= x"00000006";
+        input1 <= x"00000007";
         input2 <= x"00000002";
         ALU_ctl<= 4;
         wait until rising_edge(clk); 
@@ -138,7 +138,16 @@ begin
         input2 <= x"00000002";
         ALU_ctl<= 5;
         wait until rising_edge(clk); 
-        assert zero = x"00000000" report "Test6: Failed, ALU output not correct" severity error;
+        assert zero_tst = ’0‘ report "Test7: Failed, ALU output not correct" severity error;
+
+        wait for clk_period;
+
+        report "Test8: Test 5 and 3 = 3";
+        input1 <= x"00000005";
+        input2 <= x"00000003";
+        ALU_ctl<= 7;
+        wait until rising_edge(clk); 
+        assert  ALU_res = x"00000003" report "Test8: Failed, ALU output not correct" severity error;
 
         wait for clk_period;
         -- finish;
