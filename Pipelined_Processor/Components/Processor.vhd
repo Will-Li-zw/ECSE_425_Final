@@ -108,18 +108,24 @@ architecture behavior of Processor is
         read_data_2 : in signed(31 downto 0);       -- register data 2
         ALUcontrol : in integer range 0 to 27;      -- interpreted op code from DECODE->EXE
         extended_lower_15_bits : in signed(31 downto 0); -- lower 16 bits (sign/zero extended to 32) passed in
-        pc_plus_4 : in std_logic_vector(31 downto 0);   -- carried pc_next value from FET->DEC->EXE->...
+        pc_plus_4 : in std_logic_vector(31 downto 0);   -- carried pc_next value from FET->DEC->EXE->... 
         -- reg address
+        reg_sel : in std_logic; -- if 0, then pass on rd (R), else, pass on rt (I)
         rt : in std_logic_vector(4 downto 0); 
-        rs : in std_logic_vector(4 downto 0); -- TODO: may not need??
         rd : in std_logic_vector(4 downto 0);
         -- control inputs:
 		twomux_sel : in std_logic; -- choose read data 2 or immediate
+        -- TODO: what are the meaning of these signals
+		reg_file_enable_in : in std_logic;
+        mem_to_reg_flag_in : in std_logic;
+        mem_write_request_in : in std_logic;
+        mem_read_request_in : in std_logic;
         -- forwarding inputs:
         mem_exe_reg_data    : in signed(31 downto 0);                       -- account for MEM->EXE forwarding
         mem_exe_reg_addr    : in std_logic_vector(4 downto 0); 
         forwarded_exe_exe_reg_data    : in signed(31 downto 0);             -- account for EXE->EXE forwarding
-        forwarded_exe_exe_reg_addr    : in std_logic_vector(4 downto 0);  
+        forwarded_exe_exe_reg_addr    : in std_logic_vector(4 downto 0); 
+           
         ---------------
         -- *outputs* --
         ---------------
@@ -135,12 +141,14 @@ architecture behavior of Processor is
         zero : out std_logic;
 		ALUresult : out signed(31 downto 0);
         hi : out signed(31 downto 0);
-        lo : out signed(31 downto 0);  
+        lo : out signed(31 downto 0);
+        -- TODO: if_branch signal is not generated
+        -- if_branch : out std_logic;
         -- control outputs (TODO: may not be complete)
         reg_file_enable_out : out std_logic;
         mem_to_reg_flag_out : out std_logic;
         mem_write_request_out : out std_logic;
-        meme_read_request_out : out std_logic
+        mem_read_request_out : out std_logic
 	);
 	end component;
 
@@ -323,12 +331,17 @@ begin
         pc_plus_4 				=> pc_out_decode_execute,
         
         -- reg address
+		
         rt => decode_execute_rt_reg,
-        rs => decode_execute_rs_reg,
+        -- rs => decode_execute_rs_reg,
         rd => decode_execute_rd_reg,
-        
+        reg_sel => decode_execute_reg_dst,
         -- control inputs:
-		twomux_sel 				=> decode_execute_alu_src,				-- TODO: Hold on, this map maybe wrong
+		twomux_sel 	=> decode_execute_alu_src,			
+		reg_file_enable_in 	=> decode_execute_reg_write,
+        mem_to_reg_flag_in 	=> decode_execute_mem_reg,
+        mem_write_request_in=> decode_execute_mem_write,
+        mem_read_request_in => decode_execute_mem_read,
 
         -- forwarding inputs:
         mem_exe_reg_data    	=> signed(forward_mem_exe_reg_data),
@@ -358,7 +371,7 @@ begin
         reg_file_enable_out	 	=> exe_mem_reg_file_enable,
         mem_to_reg_flag_out 	=> exe_mem_mem_to_reg,
         mem_write_request_out 	=> exe_mem_mem_write, 
-        meme_read_request_out 	=> exe_mem_mem_read
+        mem_read_request_out 	=> exe_mem_mem_read
    );
 
    memoryer : memory_stage
