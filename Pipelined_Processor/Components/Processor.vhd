@@ -8,7 +8,6 @@ library std;
 USE std.textio.all;						 -- package for io keywords: file_open()
 
 entity Processor is
--- TODO: haven't finished
 	generic(
 		clock_period : time := 1 ns;
 		word_size : INTEGER := 32;
@@ -26,7 +25,10 @@ entity Processor is
         dataread_req	: out std_logic;
 		inst_addr  		: out std_logic_vector(word_size-1 downto 0);
         data_addr  		: out std_logic_vector(word_size-1 downto 0);
-        write_data  	: out std_logic_vector(word_size-1 downto 0)
+        write_data  	: out std_logic_vector(word_size-1 downto 0);
+
+        -- output control:
+        mem_output  : out std_logic                                     -- for memory to output data mem
 	);
 end Processor;
 
@@ -47,7 +49,8 @@ architecture behavior of Processor is
         branch_addr : in std_logic_vector (bit_width-1 downto 0):=(others=>'0'); -- TODO: from execute stage
         -- output
         pc          : out std_logic_vector (bit_width-1 downto 0) := (others => '0');  -- all initalize to 0s
-        pc_next     : out std_logic_vector (bit_width-1 downto 0) := (others => '0')
+        pc_next     : out std_logic_vector (bit_width-1 downto 0) := (others => '0');
+        mem_output  : out std_logic
     );
 	end component;
 
@@ -70,6 +73,9 @@ architecture behavior of Processor is
 
         mem_reg : in std_logic_vector(4 downto 0);
         stall_out : out std_logic;
+
+        -- output request signal:
+        reg_output: in std_logic;
 
         rs_addr : out std_logic_vector(4 downto 0);
         rt_addr : out std_logic_vector(4 downto 0);
@@ -259,7 +265,7 @@ architecture behavior of Processor is
 	signal mem_wb_mem_to_reg		: std_logic;	-- carried signal for WB to select data to writeback DEC->...->WB
 
 
-
+    signal CPU_finished             : std_logic;
 
 
 begin
@@ -276,8 +282,11 @@ begin
 		branch_addr    => ex_branch_addr,
 
 		pc             => inst_addr,
-		pc_next        => pc_out_fetch_decode
+		pc_next        => pc_out_fetch_decode,
+        mem_output     => CPU_finished
    );
+
+   mem_output <= CPU_finished;
 
    decoder : decode_stage
    port map(
@@ -291,9 +300,11 @@ begin
 		w_data 			=> write_back_data,
 		w_addr 			=> write_back_reg,
 		w_enable 	    => write_back_enable,
-		-- stall for fetch
-		mem_reg   => mem_decode_reg,
+        -- stall related
+		mem_reg   => mem_decode_reg,              
 		stall_out => stall_req,					  -- stall that goes to fetch
+        -- reg_output control signal
+        reg_output => CPU_finished,               -- reg_output is an input control signal
 		-- output register addr to following stage
 		rs_addr   => decode_execute_rs_reg,		 
 		rt_addr   => decode_execute_rt_reg,
