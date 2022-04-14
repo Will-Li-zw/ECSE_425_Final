@@ -106,18 +106,6 @@ begin
 
         assert lo_tst = x"00000006" report "Test4: Failed, ALU output not correct" severity error;
 
-      
-        report "Test5: Test for large value multi";
-        input1 <= x"ffffffff";
-        input2 <= x"ffffffff";
-        ALU_ctl<= 3;
-        wait until rising_edge(clk); 
-        wait for clk_period;
-
-        assert lo_tst = x"00000000" report "Test5 low: Failed, ALU output not correct" severity error;
-        assert hi_tst = x"FFFFFFFE" report "Test5 high: Failed, ALU output not correct" severity error;
-
-
         report "Test5: Test for large value multi";
         input1 <= x"0fffffff";
         input2 <= x"000000ff";
@@ -126,7 +114,7 @@ begin
         wait for clk_period;
 
         assert lo_tst = x"FFFFFF01" report "Test5 low: Failed, ALU output not correct" severity error;
-        assert hi_tst = x"000000FE" report "Test5 high: Failed, ALU output not correct" severity error;
+        assert hi_tst = x"0000000F" report "Test5 high: Failed, ALU output not correct" severity error;
         
       
         report "Test6: Test 6/2 = 3";
@@ -140,15 +128,15 @@ begin
         assert hi_tst = x"00000000" report "Test6: Failed, ALU output not correct" severity error;
 
 
-        report "Test6: Test 7/3 = 2.....1";
+        report "Test7: Test 7/3 = 2.....1";
         input1 <= x"00000007";
         input2 <= x"00000003";
         ALU_ctl<= 4;
         wait until rising_edge(clk); 
         wait for clk_period;
 
-        assert lo_tst = x"00000002" report "Test6: Failed, ALU output not correct" severity error;
-        assert hi_tst = x"00000001" report "Test6: Failed, ALU output not correct" severity error;
+        assert lo_tst = x"00000002" report "Test7: Failed, ALU output not correct" severity error;
+        assert hi_tst = x"00000001" report "Test7: Failed, ALU output not correct" severity error;
 
 
         report "Test7: Test set less than";
