@@ -9,23 +9,6 @@ ENTITY decodeStage_tb IS
 END decodeStage_tb;
  
 ARCHITECTURE behavior OF decodeStage_tb IS 
-
-    -- COMPONENT register_file
-    -- PORT(
-    --     clk_rf : in std_logic;
-    --     reset : in std_logic;
-
-    --     r_reg1 : in std_logic_vector(4 downto 0);
-    --     r_reg2 : in std_logic_vector(4 downto 0);
-    --     w_reg : in std_logic_vector(4 downto 0);
-    --     w_enable : in std_logic;
-    --     w_data : in std_logic_vector(31 downto 0);
-
-    --     r_data1 : out std_logic_vector(31 downto 0);
-    --     r_data2 : out std_logic_vector(31 downto 0)
-    --     );
-    -- END COMPONENT;
-
     COMPONENT decode_stage
     generic(
         reg_adrsize : INTEGER := 32;
@@ -112,25 +95,12 @@ ARCHITECTURE behavior OF decodeStage_tb IS
    signal alu_src: std_logic; -- select the second ALU input from either rt or sign-extended immediate
    -- ALU Operation
    signal alu_op: integer; -- ALU code for EXE
-
-   -----------------------------register file intermediate---------------------------
    --Inputs
---    signal reset : std_logic := '0';
    signal w_enable : std_logic := '0';
---    signal r_reg1 : std_logic_vector(4 downto 0) := (others => '0');
---    signal r_reg2 : std_logic_vector(4 downto 0) := (others => '0');
---    signal w_reg : std_logic_vector(4 downto 0) := (others => '0');
---    signal w_data : std_logic_vector(31 downto 0) := (others => '0');
-
---    --Outputs
---    signal r_data1 : std_logic_vector(31 downto 0);
---    signal r_data2 : std_logic_vector(31 downto 0);
-
---    -- Clock period definitions
+   -- Clock period definitions
    constant CLK_period : time := 1 ns;
  
 BEGIN
-
 	-- Instantiate the Unit Under Test (UUT)
    uut: decode_stage port map (
         clk => clk,
@@ -175,29 +145,26 @@ BEGIN
    stim_proc: process
    begin		
     -- initialization
-        wait for 1 ns;	
-        w_enable 			<= '1';
-        w_addr		<= "01100";
-        w_data 	<= "00000000000000000000000000000100";--random 32bit
-        wait for CLK_period;
+        wait for 0.5*CLK_period;	
+        w_enable <= '1';
+        w_addr <= "01100";
+        w_data <= "00000000000000000000000000000100";--random 32bit
         
-        wait for 1 ns;	
-        w_enable 			<= '1';
-        w_addr		<= "01101";
-        w_data 	<= "00000000000000000000000000000010";--random 32bit
         wait for CLK_period;
+        w_enable <= '1';
+        w_addr <= "01101";
+        w_data <= "00000000000000000000000000000010";--random 32bit
 
-        wait for 1 ns; 
+        wait for CLK_period;
         w_enable    <= '1';
         w_addr  <= "00001";
         w_data  <= "00000000000000000000000000001111";--random 32bit
         wait for CLK_period;
         
-        wait for 1 ns; 
+        wait for CLK_period;
         w_enable    <= '1';
         w_addr  <= "00010";
         w_data  <= "00000000000000000000000000000111";--random 32bit
-        wait for CLK_period*1.5;
 
 --Test case 1 - 000000 01011 01100 01101 00000 100000   ADD R11,R12,R13
         report "Test 1 - ADD R11,R12,R13";
@@ -205,10 +172,6 @@ BEGIN
         pc_in <= (others => '0');
         assert pc_out <= "00000000000000000000000000000000" report "Test1: pc_out error" severity error;
         instruction_in <= "00000001011011000110100000100000";
-        w_data <= (others => '0');
-        w_addr <= (others => '0');
-        w_enable <= '1';
-        mem_reg <= (others => '0');
         wait for 1 ns;
 
         assert stall_out <= '0' report "Test1: stall_out error" severity error;
@@ -229,20 +192,16 @@ BEGIN
         w_addr  <= "01100";
         w_data  <= "00000000000000000000000000001100";--random 32bit
         wait for CLK_period;
-        
-        wait for 1 ns; 
+
         w_enable    <= '1';
         w_addr  <= "01101";
         w_data  <= "00000000000000000000000000000110";--random 32bit
         wait for CLK_period;
+
         w_enable <='0';
         pc_in <= (others => '0');
         assert pc_out <= "00000000000000000000000000000000" report "Test2: pc_out error" severity error;
         instruction_in <= "00000001010011110000000000011000";
-        w_data <= (others => '0');
-        w_addr <= (others => '0');
-        w_enable <= '1';
-        mem_reg <= (others => '0');
         wait for 1 ns;
 
         assert stall_out <= '0' report "Test2: stall_out error" severity error;
@@ -304,11 +263,6 @@ BEGIN
         --Test case 5 - 000000 01010 01111 00000 00000 011000   MULT R10,R15,R0    R0=R10*R15
         report "Test 5 - MULT R10,R15,R0";
         instruction_in <= "00000001010011110000000000011000";
-        w_data <= (others => '0');
-        w_addr <= (others => '0');
-        w_enable <= '1';
-        mem_reg <= (others => '0');
-    	   
     	wait for 1 ns;
     	   
         assert stall_out <= '0' report "Test5: stall_out error" severity error;
