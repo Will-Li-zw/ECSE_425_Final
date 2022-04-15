@@ -9,7 +9,8 @@
 #### Benchmark1 -- Entry point
 ----
 #### Benchmark2 -- Fibonacci
-**Note**:
+__Note: In this project, we assume that the end of project is not an infinite loop instruction. Our CPU will determine when is the end of the instruction by itself since when loading the instructions from "program.txt", we assigned the rest of instruction memory as undefined.__
+
 1. Go to the integration directory
 2. Use Modelsim to open the project file: processor.mpf
 3. Make sure all files needed to run are included:  
