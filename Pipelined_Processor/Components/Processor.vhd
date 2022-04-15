@@ -83,7 +83,6 @@ architecture behavior of Processor is
         rt_data : out std_logic_vector(reg_adrsize-1 downto 0); 	-- contents of rt
         imm_32 : out std_logic_vector(reg_adrsize-1 downto 0);  	-- sign extended immediate value
         jump_addr : out std_logic_vector(reg_adrsize-1 downto 0);
-        branch_addr : out std_logic_vector(reg_adrsize-1 downto 0);
 
         -------- CTRL signals --------
         -- Register Write
@@ -233,7 +232,6 @@ architecture behavior of Processor is
 	signal decode_execute_rs_data: std_logic_vector(word_size-1 downto 0);	 -- rs data DECODE->EXE
 	signal decode_execute_rt_data: std_logic_vector(word_size-1 downto 0);   -- rt data DECODE->EXE
 	signal decode_execute_imme_data 	: std_logic_vector(word_size-1 downto 0);   -- immediate value DECODE->EXE
-	signal decode_execute_branch_addr	: std_logic_vector(word_size-1 downto 0);	-- branch addr DECODE->EXECUTE
 	signal decode_execute_reg_write		: std_logic;	-- write register control DECODE->EXECUTE
 	signal decode_execute_reg_dst		: std_logic;	-- TODO: maybe not useful
 	signal decode_execute_mem_reg		: std_logic;	-- mem_reg to guide which result to Writeback DECODE->...->WB
@@ -325,7 +323,6 @@ begin
 		rt_data   => decode_execute_rt_data,     
 		imm_32    => decode_execute_imme_data,	  
 		jump_addr => de_jump_addr,
-		branch_addr => decode_execute_branch_addr,
 
 		-------- CTRL signals --------
 		-- Register Write

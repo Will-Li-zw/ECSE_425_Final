@@ -70,10 +70,7 @@ ARCHITECTURE behavior OF memory IS
 	begin
 		file_open(f, instruction_filepath, read_mode);
 		L1: while i < inst_ram_size-1 loop		
-			readline(f, aline);
-			if (endfile(f)) then				-- if reached EOF, exit loop early
-				exit L1;
-			end if;
+			readline(f, aline);	
 			read(aline, instruction);
 			-- parse instruction into 4 parts
 			mem(i) <= instruction(7 downto 0);	-- NOTE: because I assign the signal, it needs to be defined as OUT signal in paramter
@@ -81,7 +78,9 @@ ARCHITECTURE behavior OF memory IS
 			mem(i+2) <= instruction(23 downto 16);
 			mem(i+3) <= instruction(31 downto 24);
 			i := i+4;	-- update counter by a word
-			
+			if (endfile(f)) then				-- if reached EOF, exit loop early
+				exit L1;
+			end if;		
 		end loop;
 		file_close(f);
 	end load_instruction_from_file;

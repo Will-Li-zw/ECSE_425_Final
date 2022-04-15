@@ -90,7 +90,7 @@ begin
     variable shamt : std_logic_vector(4 downto 0);
     variable funct : std_logic_vector(5 downto 0);
     begin
-        if falling_edge(clk) then
+        if rising_edge(clk) then
             if last_stall = '1' then
                 -- cur_instruction <= last_instruction;
                 last_stall <= '0';
@@ -166,6 +166,14 @@ begin
                 jump_addr <= std_logic_vector(resize(unsigned(jump_addr_s), jump_addr'length));
                 ctrl_sigs <= "0U000100";
                 
+            -------------------- Null-instruction ----------------
+            -- Note: added by Zichen, to accomodate when instruction is undefined
+            elsif opcode = "UUUUUU" then        -- when instruction is null
+                alu_op <= 27;
+                stall_out <= '0';               -- release stall
+                last_stall <= '0';  
+                -- ctrl_sigs <= "UUUUUUUU";        -- control signal to U
+
             -------------------- I-instruction--------------------
             else
                 if (mem_reg /= "UUUUU" or rs_s /= "UUUUU") and (mem_reg = rs_s) then  -- if dependency detected
@@ -228,10 +236,10 @@ begin
     -- Control signal output
     reg_write <= ctrl_sigs(7); -- determine if a result needs to be written to a register
     reg_dst <= ctrl_sigs(6); -- select the dst reg as either rd(R-type instruction) or rt(I-type instruction)
-    mem_to_reg <= ctrl_sigs(5);
-    jump <= ctrl_sigs(4);
-    branch <= ctrl_sigs(3);
-    mem_read <= ctrl_sigs(2);
-    mem_write <= ctrl_sigs(1);
+    mem_to_reg <= ctrl_sigs(5); -- if select ALUresult or data memory to WB
+    jump <= ctrl_sigs(4);       -- if jump
+    branch <= ctrl_sigs(3);     -- if this is a branch instruction
+    mem_read <= ctrl_sigs(2);   -- want to read memory: LD
+    mem_write <= ctrl_sigs(1);  -- want to write memory: ST
     alu_src <= ctrl_sigs(0); -- select the second ALU input from either rt or sign-extended immediate
 end Behavioral;

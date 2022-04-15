@@ -117,7 +117,7 @@ COMPONENT ALU IS
 	port (
 			data1 : IN SIGNED(31 DOWNTO 0);
 			op2 : IN SIGNED (31 DOWNTO 0); -- output from a 2MUX (either data2 or instruct(15 downto 0))
-			ALUcontrol : IN INTEGER range 0 to 26; --sequential encoding based on page 2 of the pdf
+			ALUcontrol : IN INTEGER range 0 to 27; --sequential encoding based on page 2 of the pdf
             extended_imm : in SIGNED(31 downto 0); -- for shift instruction, lower 16 bits (sign/zero extended to 32)
 
 			ALUresult : OUT SIGNED(31 DOWNTO 0);
