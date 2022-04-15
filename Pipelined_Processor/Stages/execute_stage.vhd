@@ -82,7 +82,7 @@ SIGNAL op1 : signed(31 downto 0);
 SIGNAL op2 : signed(31 downto 0);
 -- output intermediate buffer registers to make the circuit synchronous
 SIGNAL reg_address_buffer : std_logic_vector(4 downto 0);
-SIGNAL read_data_2_out_buffer : signed(31 downto 0);
+SIGNAL read_data_2_out_buffer : signed(31 downto 0);            -- read_data_2_out_buffer for output
 SIGNAL pc_plus_4_out_buffer : std_logic_vector(31 downto 0);
 SIGNAL Addresult_buffer : signed(31 downto 0);
 SIGNAL zero_buffer : std_logic;
@@ -95,10 +95,7 @@ SIGNAL mem_to_reg_flag_out_buffer : std_logic;
 SIGNAL mem_write_request_out_buffer : std_logic;
 SIGNAL mem_read_request_out_buffer : std_logic;
 
--- SIGNAL grandpa_rd : std_logic_vector(4 downto 0) := (others => 'U'); -- previous previous instruction's destination
--- SIGNAL father_rd : std_logic_vector(4 downto 0) := (others => 'U'); -- previous instruction's destination
--- SIGNAL grandpa_result : std_logic_vector(31 downto 0) := (others => 'U'); -- previous previous instruction's ALU result
--- SIGNAL father_result : std_logic_vector(31 downto 0) := (others => 'U'); -- previous instruction's ALU result
+SIGNAL read_data_1_out_buffer : signed(31 downto 0);            -- true operand1 for branch detection
 
 COMPONENT FIVEMUX IS -- for forward logic
 	port (
@@ -147,7 +144,6 @@ END COMPONENT;
 
 BEGIN
 
-    -- TODO: forward muxs change port maps
 	cmpnt_fwd1_fivemux: FIVEMUX port map( -- for choosing first ALU operand
 		sel             => op1_select,
         input0          => std_logic_vector(read_data_1),        -- to match type
@@ -194,18 +190,21 @@ BEGIN
 	);
 
     Branch: PROCESS(ALUcontrol, read_data_1, read_data_2, clk) -- JUMP is done in decode stage
+    -- NOTE: branch detection also needs forwarding support
     BEGIN
         if rising_edge(clk) then
             CASE ALUcontrol IS
                 WHEN 22 => -- beq
-                    IF read_data_1 = read_data_2 THEN
+                    IF read_data_1_out_buffer = read_data_2_out_buffer THEN
                         if_branch <= '1';
-                    ELSE if_branch <= '0';
+                    ELSE 
+                        if_branch <= '0';
                     END IF;
                 WHEN 23 => -- bne
-                    IF read_data_1 /= read_data_2 THEN
+                    IF read_data_1_out_buffer /= read_data_2_out_buffer THEN
                         if_branch <= '1';
-                    ELSE if_branch <= '0';
+                    ELSE 
+                        if_branch <= '0';
                     END IF;
                 WHEN Others =>
                     if_branch <= '0';
@@ -310,18 +309,26 @@ BEGIN
             -----------------------------------------------------------------------
 		END IF;
 	END process; -- end process
-    
-    -- below are combinatorial, clock delay achieved in process block
-    -- op2 <= muxout;              -- TODO: op2 is not an output signal nor intermediate signal
 
-    -- TODO: Zichen: I changed the "reg_file_enable_out_buffer" to "reg_address_buffer"...
-    -- TODO? why we are using twomux_sel here?????
+    -----------------------------
+    -- * COMBINATIONAL LOGIC * --
+    -----------------------------
 	WITH reg_sel select reg_address_buffer <=        
 			rd WHEN '1', -- R type instruction, use rd in WB
 			rt WHEN '0', -- I type instruction, use rt in MEM
 			(others => 'X') WHEN others;
             
-    read_data_2_out_buffer <= read_data_2;
+    -- read true operand2 for passing along pipeline
+    WITH op2_select select read_data_2_out_buffer <= 
+        forwarded_exe_exe_reg_data WHEN 1,  --forwarded father address
+        mem_exe_reg_data WHEN 2,            -- forwarded grandpa
+        read_data_2 WHEN others;            -- no forwarding needed
+    -- read true operand1 for branch detection
+    WITH op1_select select read_data_1_out_buffer <=
+        forwarded_exe_exe_reg_data WHEN 1,  --forwarded father address
+        mem_exe_reg_data WHEN 2,            -- forwarded grandpa
+        read_data_1 WHEN others;            -- no forwarding needed
+
 	reg_file_enable_out_buffer <= reg_file_enable_in;
 	mem_to_reg_flag_out_buffer <= mem_to_reg_flag_in;
     mem_write_request_out_buffer <= mem_write_request_in;

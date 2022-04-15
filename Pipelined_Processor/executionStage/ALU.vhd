@@ -162,13 +162,17 @@ BEGIN
                 
 			WHEN 20 => -- lw (load word)
 				report "The value of 'ALUcontrol' is " & integer'image(ALUcontrol);
-				
-                null;
+				ALUresult_buffer <= data1 + op2; -- calculate the destination addr in data memory
+				if data1+op2 = 0 then
+					zero <= '1';
+				else
+					zero <= '0';
+				end if;
                 
 			WHEN 21 => -- sw (store word)
 				report "The value of 'ALUcontrol' is " & integer'image(ALUcontrol);
-                ALUresult_buffer <= op2; -- pass the word to be stored to memeory stage
-				if op2 = 0 then
+                ALUresult_buffer <= data1 + op2; -- calculate the destination addr in data memory
+				if data1+op2 = 0 then
 					zero <= '1';
 				else
 					zero <= '0';
@@ -209,26 +213,9 @@ BEGIN
                 null;
                 
 		END CASE;
-        -- in case of stall, the following "if" block should not change "zero" output because ALU_reuslt didn't change
-		-- TODO: Still problematic in the same process!
-		-- if ALUresult_buffer = x"00000000" then
-		-- 	zero <= '1';
-        -- else
-        -- 	zero <= '0';
-		-- END if;	
+ 
 	END process;
 
-	-- CAN't USE MULTIPLE PROCESS BLOCK TO DRIVE SAME OUTPUT!!!!
-
-	-- multiplication_buffer_process : process(multiplication_buffer, ALUcontrol)
-	-- begin
-	-- 	if ALUcontrol = 3 then
-	-- 		lo_buffer <= multiplication_buffer(31 downto 0);
-	-- 		hi_buffer <= multiplication_buffer(63 downto 32);
-	-- 	end if;
-	-- end process;
-
-	-- signal connect to output
 	ALUresult <= ALUresult_buffer;
 
 	lo <= temp_ALUresult(31 downto 0);
