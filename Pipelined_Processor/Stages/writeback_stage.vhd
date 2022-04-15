@@ -51,11 +51,6 @@ begin
     writeback: process(clock, mem_to_reg_flag)
     begin
         if rising_edge(clock) then
-            -- if mem_to_reg_flag='1' then
-            --     write_data<=read_data;
-            -- else
-            --     write_data<=alu_result;
-            -- end if;
             -- passing control signal 
             reg_file_enable_out <= reg_file_enable_in;
             -- passing data and reg address for update in decode
