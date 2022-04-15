@@ -117,6 +117,7 @@ architecture behavior of Processor is
         reg_sel : in std_logic; -- if 0, then pass on rd (R), else, pass on rt (I)
         rt : in std_logic_vector(4 downto 0); 
         rd : in std_logic_vector(4 downto 0);
+        rs : in std_logic_vector(4 downto 0);
         -- control inputs:
 		twomux_sel : in std_logic; -- choose read data 2 or immediate
         -- TODO: what are the meaning of these signals
@@ -129,13 +130,19 @@ architecture behavior of Processor is
         mem_exe_reg_addr    : in std_logic_vector(4 downto 0); 
         forwarded_exe_exe_reg_data    : in signed(31 downto 0);             -- account for EXE->EXE forwarding
         forwarded_exe_exe_reg_addr    : in std_logic_vector(4 downto 0); 
-           
+        forwarded_exe_exe_lo_data    : in signed(31 downto 0);              -- account for EXE->EXE forwarding
+        forwarded_exe_exe_hi_data    : in signed(31 downto 0);              -- account for EXE->EXE forwarding
+
+
         ---------------
         -- *outputs* --
         ---------------
         -- forwarding outputs:
         forwarding_exe_exe_reg_data    : out signed(31 downto 0);           -- output forwarding to next CC EXE
-        forwarding_exe_exe_reg_addr    : out std_logic_vector(4 downto 0); 
+        forwarding_exe_exe_lo_data    : out signed(31 downto 0);           -- output forwarding to next CC EXE
+        forwarding_exe_exe_hi_data    : out signed(31 downto 0);           -- output forwarding to next CC EXE
+        forwarding_exe_exe_reg_addr    : out std_logic_vector(4 downto 0);
+
         reg_address : out std_logic_vector(4 downto 0);
         -- register to be written (WB), for R type instrustion (reg_address = rd)
 		-- register to be loaded by memory data (MEM LW), for I type instrustion (reg_address = rt)
@@ -247,6 +254,8 @@ architecture behavior of Processor is
 	signal forward_mem_exe_reg_addr	: std_logic_vector(4 downto 0);				-- register addr from MEM->EXE forwarding
 	signal forward_exe_exe_reg_data	: std_logic_vector(word_size-1 downto 0);	-- register value from EXE->EXE forwarding
 	signal forward_exe_exe_reg_addr	: std_logic_vector(4 downto 0);	-- register addr from EXE->EXE forwarding
+    signal forward_exe_exe_lo_data  : std_logic_vector(word_size-1 downto 0);	-- lo value from EXE->EXE forwarding
+    signal forward_exe_exe_hi_data  : std_logic_vector(word_size-1 downto 0);	-- hi value from EXE->EXE forwarding
 	signal exe_mem_or_wb_reg_addr	: std_logic_vector(4 downto 0);				-- register addr for WB or MEM load
 	signal store_exe_mem_data		: std_logic_vector(word_size-1 downto 0);	-- output data for STORE instruction DEC->EXE->MEM
 	signal exe_alu_result			: std_logic_vector(word_size-1 downto 0);	-- output of ALU calculation EXE->MEM
@@ -353,7 +362,7 @@ begin
         -- reg address
 		
         rt => decode_execute_rt_reg,
-        -- rs => decode_execute_rs_reg,
+        rs => decode_execute_rs_reg,
         rd => decode_execute_rd_reg,
         reg_sel => decode_execute_reg_dst,
         -- control inputs:
@@ -368,6 +377,8 @@ begin
         mem_exe_reg_addr    	=> forward_mem_exe_reg_addr,
         forwarded_exe_exe_reg_data => signed(forward_exe_exe_reg_data),
         forwarded_exe_exe_reg_addr => forward_exe_exe_reg_addr,
+        forwarded_exe_exe_lo_data  => signed(forward_exe_exe_lo_data), 
+        forwarded_exe_exe_hi_data  => signed(forward_exe_exe_hi_data),
         
         ---------------
         -- *outputs* --
@@ -375,6 +386,8 @@ begin
         -- forwarding outputs:
         std_logic_vector(forwarding_exe_exe_reg_data) => forward_exe_exe_reg_data,       
         forwarding_exe_exe_reg_addr => forward_exe_exe_reg_addr,
+        std_logic_vector(forwarding_exe_exe_lo_data)  => forward_exe_exe_hi_data,
+        std_logic_vector(forwarding_exe_exe_hi_data)  => forward_exe_exe_lo_data,
 
         reg_address => exe_mem_or_wb_reg_addr,
         -- register to be written (WB), for R type instrustion (reg_address = rd)

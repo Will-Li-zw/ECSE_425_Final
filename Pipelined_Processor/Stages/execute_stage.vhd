@@ -214,7 +214,8 @@ BEGIN
         end if;
     END PROCESS;
 
-    forwarding: PROCESS(clk)
+    -- process for forwarding control signal: op1_select and op2_select
+    forwarding: PROCESS(ALUcontrol, forwarded_exe_exe_reg_addr, mem_exe_reg_addr)
     BEGIN
         CASE ALUcontrol IS
             WHEN 0 | 1 | 3 | 4 | 5 | 7 | 8 | 9 | 10 => -- case 1: rs and rt as oprands (All R-types)
