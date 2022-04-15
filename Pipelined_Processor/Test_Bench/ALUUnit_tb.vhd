@@ -13,6 +13,7 @@ component ALU is
 			data1 : IN SIGNED(31 DOWNTO 0);
 			op2 : IN SIGNED (31 DOWNTO 0); -- output from a 2MUX (either data2 or instruct(15 downto 0))
 			ALUcontrol : IN INTEGER range 0 to 26; --sequential encoding based on page 2 of the pdf
+			extended_imm : in SIGNED(31 downto 0); -- for shift instructions' shamt, lower 16 bits (sign/zero extended to 32)
 
 			ALUresult : OUT SIGNED(31 DOWNTO 0);
             hi : OUT SIGNED(31 DOWNTO 0);
@@ -33,6 +34,7 @@ signal ALU_res: signed(31 downto 0);
 signal hi_tst : signed(31 downto 0);
 signal lo_tst : signed(31 downto 0);
 signal zero_tst: std_logic;
+signal extended_imm: SIGNED(31 downto 0); -- for shift instructions' shamt, lower 16 bits (sign/zero extended to 32)
 
 
 begin
@@ -45,11 +47,12 @@ begin
             data1       => input1,
 			op2         => input2,
 			ALUcontrol  => ALU_ctl,
-
+            extended_imm => extended_imm,
 			ALUresult   => ALU_res,
             hi          => hi_tst,
 			lo          => lo_tst,
 			zero        => zero_tst
+            
     );
                     
     -- clock loop
