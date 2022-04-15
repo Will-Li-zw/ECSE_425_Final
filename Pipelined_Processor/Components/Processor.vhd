@@ -287,14 +287,14 @@ begin
 		pc_next        => pc_out_fetch_decode
    );
 
-   Instruction_end_of_file : process(instruction, clock)
-   begin
-        if(instruction = "UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU") then    -- if instruction meet the end of file
-            CPU_finished <= '1' after 5 ns;     -- wait for the last instruction to finish
-        else 
-            CPU_finished <= '0';
-        end if;
-   end process;
+--    Instruction_end_of_file : process(instruction, clock)
+--    begin
+--         if(instruction = "UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU") then    -- if instruction meet the end of file
+--             CPU_finished <= '1' after 5 ns;     -- wait for the last instruction to finish
+--         else 
+--             CPU_finished <= '0';
+--         end if;
+--    end process;
    mem_output <= CPU_finished;                 -- output to the memory unit
 
 
@@ -451,8 +451,10 @@ begin
 				instread_req <= '0';
 				datawrite_req<= '0';
 				dataread_req <= '0';
+                CPU_finished <= '0';
 			else
 				instread_req <= '1';
+                CPU_finished <= '1';
 			end if;
 	end process;
 

@@ -113,11 +113,13 @@ BEGIN
 	END PROCESS;
 
 	-- write file
-	write_process: PROCESS(memoutput)
+	write_process: PROCESS(memoutput, clock)
 	BEGIN
-		IF (memoutput'event AND memoutput = '1') THEN
-			output_data_to_file(data_ram_block);
-		END IF;
+		if(rising_edge(clock)) then
+			IF (memoutput = '1') THEN
+				output_data_to_file(data_ram_block);
+			END IF;
+		end if;
 	END PROCESS;
 
 

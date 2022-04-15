@@ -51,11 +51,13 @@ architecture arch of register_file is
 
     begin
         -- write registers output
-        write_process: PROCESS(regoutput)
+        write_process: PROCESS(regoutput, clk_rf)
         BEGIN
-            IF (regoutput'event AND regoutput = '1') THEN
-                output_registers_to_file(r);
-            END IF;
+            if rising_edge(clk_rf) then
+                IF (regoutput = '1') THEN
+                    output_registers_to_file(r);
+                END IF;
+            end if;
         END PROCESS;
 
         -- output data in two registers 
