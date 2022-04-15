@@ -29,6 +29,15 @@ component execute_stage is
         mem_to_reg_flag_in : in std_logic;
         mem_write_request_in : in std_logic;
         mem_read_request_in : in std_logic;
+        reg_sel : in std_logic; -- if 0, then pass on rd (R), else, pass on rt (I)
+
+        -- forwarding inputs:
+        mem_exe_reg_data    : in signed(31 downto 0);                       -- account for MEM->EXE forwarding
+        mem_exe_reg_addr    : in std_logic_vector(4 downto 0); 
+        forwarded_exe_exe_reg_data    : in signed(31 downto 0);             -- account for EXE->EXE forwarding
+        forwarded_exe_exe_reg_addr    : in std_logic_vector(4 downto 0); 
+        forwarded_exe_exe_lo_data    : in signed(31 downto 0);              -- account for EXE->EXE forwarding
+        forwarded_exe_exe_hi_data    : in signed(31 downto 0);              -- account for EXE->EXE forwarding
         
         -- outputs --
         reg_address : out std_logic_vector(4 downto 0);
@@ -46,7 +55,7 @@ component execute_stage is
         reg_file_enable_out : out std_logic;
         mem_to_reg_flag_out : out std_logic;
         mem_write_request_out : out std_logic;
-        meme_read_request_out : out std_logic
+        mem_read_request_out : out std_logic
 	);
 end component;
 	
@@ -73,7 +82,16 @@ signal twomux_sel : std_logic            := '0'; -- choose read data 2 or immedi
 signal reg_file_enable_in : std_logic    := '0';
 signal mem_to_reg_flag_in : std_logic    := '0';
 signal mem_write_request_in : std_logic  := '0';
-signal meme_read_request_in : std_logic  := '0';
+signal mem_read_request_in : std_logic  := '0';
+signal reg_sel : std_logic := '0'; -- if 0, then pass on rd (R), else, pass on rt (I)
+
+-- forwarding inputs:
+signal mem_exe_reg_data    : signed(31 downto 0) := (others => '0');                       -- account for MEM->EXE forwarding
+signal mem_exe_reg_addr    : std_logic_vector(4 downto 0):= (others => '0'); 
+signal forwarded_exe_exe_reg_data    : signed(31 downto 0):= (others => '0');             -- account for EXE->EXE forwarding
+signal forwarded_exe_exe_reg_addr    : std_logic_vector(4 downto 0):= (others => '0'); 
+signal forwarded_exe_exe_lo_data    : signed(31 downto 0):= (others => '0');              -- account for EXE->EXE forwarding
+signal forwarded_exe_exe_hi_data    : signed(31 downto 0):= (others => '0');              -- account for EXE->EXE forwarding
 
 -----------------
 -- * outputs * --
@@ -92,7 +110,7 @@ signal lo : signed(31 downto 0);
 signal reg_file_enable_out : std_logic;
 signal mem_to_reg_flag_out : std_logic;
 signal mem_write_request_out : std_logic;
-signal meme_read_request_out : std_logic;
+signal mem_read_request_out : std_logic;
 
 begin
 
@@ -118,7 +136,16 @@ begin
 		reg_file_enable_in      => reg_file_enable_in,
         mem_to_reg_flag_in      => mem_to_reg_flag_in,
         mem_write_request_in    => mem_write_request_in,
-        meme_read_request_in    => meme_read_request_in,
+        mem_read_request_in    => mem_read_request_in,
+        reg_sel                 => reg_sel,
+
+        -- forwarding inputs:
+        mem_exe_reg_data        => mem_exe_reg_data,
+        mem_exe_reg_addr        => mem_exe_reg_addr,
+        forwarded_exe_exe_reg_data        => forwarded_exe_exe_reg_data,
+        forwarded_exe_exe_reg_addr        => forwarded_exe_exe_reg_addr,
+        forwarded_exe_exe_lo_data        => forwarded_exe_exe_lo_data,
+        forwarded_exe_exe_hi_data        => forwarded_exe_exe_hi_data,
         
         -- outputs --
         reg_address => reg_address,
@@ -133,7 +160,7 @@ begin
         reg_file_enable_out     => reg_file_enable_out,
         mem_to_reg_flag_out     => mem_to_reg_flag_out,
         mem_write_request_out   => mem_write_request_out,
-        meme_read_request_out   => meme_read_request_out
+        mem_read_request_out   => mem_read_request_out
     );
                     
     -- clock loop
@@ -242,28 +269,28 @@ begin
         assert ALUresult = "10001000000010010000000000000000" report "Test8: Failed, LUI not correct" severity error;
 
         report "Test9: Test SLL instruction:";
-        read_data_1 <= x"00000008";
-        read_data_2 <= x"00000004";
+        read_data_2 <= "10000000000000000000000000001000";
+        extended_lower_15_bits <= "10000000000000000000000111100100";
         ALUcontrol  <= 17;
         twomux_sel  <= '0';
         wait for clk_period;   -- wait after the rising edge
-        assert ALUresult = x"00000080" report "Test9: Failed, SLL not correct" severity error;
+        assert ALUresult = "00000000000000000000010000000000" report "Test9: Failed, SLL not correct" severity error;
 
         report "Test10: Test SRL instruction:";
-        read_data_1 <= x"80000008";
-        read_data_2 <= x"00000004";
+        read_data_2 <= "10000000000000000000000000001000";
+        extended_lower_15_bits <= "10000000000000000000000111100100";
         ALUcontrol  <= 18;
         twomux_sel  <= '0';
         wait for clk_period;   -- wait after the rising edge
-        assert ALUresult = x"08000000" report "Test10: Failed, SRL not correct" severity error;
+        assert ALUresult = "00000001000000000000000000000000" report "Test10: Failed, SRL not correct" severity error;
 
         report "Test11: Test SRA instruction:";
-        read_data_1 <= x"80000008";
-        read_data_2 <= x"00000004";
+        read_data_2 <= "10000000000000000000000000001000";
+        extended_lower_15_bits <= "10000000000000000000000111100100";
         ALUcontrol  <= 19;
         twomux_sel  <= '0';
         wait for clk_period;   -- wait after the rising edge
-        assert ALUresult = x"F8000000" report "Test11: Failed, SRA not correct" severity error;
+        assert ALUresult = "11111111000000000000000000000000" report "Test11: Failed, SRA not correct" severity error;
 
         -- LD AND ST are trivial...
 

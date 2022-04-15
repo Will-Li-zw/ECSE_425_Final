@@ -215,7 +215,7 @@ BEGIN
         assert rs_addr <= "01011" report "Test1: rs_addr" severity error;
         assert rt_addr <= "01100" report "Test1: rt_addr" severity error;
         assert rs_data <= "00000000000000000000000000000100" report "Test1: rs_data" severity error;
-        assert rt_data <= "00000000000000000000000000000010" report "Test1: rt_data" severity error;
+        assert rt_data <= "00000000000000000000000000000100" report "Test1: rt_data" severity error;
         -------- CTRL signals --------jump_addr
         assert reg_write <= '1' report "Test1: reg_write error" severity error;
         assert reg_dst <= '1' report "Test1: reg_write error" severity error;
