@@ -172,8 +172,8 @@ begin
                     when "001000" => alu_op <= 25;        -- 25. jr
                         ctrl_sigs <= "01000000";
                     when others => alu_op <= 27;
+                    ctrl_sigs <= "11000000";        -- when R type, the alr_src should be 0 to select register instead of #imm
                 end case;
-                -- ctrl_sigs <= "11000000";        -- when R type, the alr_src should be 0 to select register instead of #imm
                 
             -------------------- J-instruction--------------------
             elsif opcode = "000010" then  -- 24. j
