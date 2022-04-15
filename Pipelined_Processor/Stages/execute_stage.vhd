@@ -19,7 +19,7 @@ entity execute_stage is
         reg_sel : in std_logic; -- if 0, then pass on rd (R), else, pass on rt (I)
         rt : in std_logic_vector(4 downto 0); 
         rd : in std_logic_vector(4 downto 0);
-        
+        rs : in std_logic_vector(4 downto 0);
         -- control inputs:
 		twomux_sel : in std_logic; -- choose read data 2 or immediate
 
@@ -255,6 +255,9 @@ BEGIN
                 ELSIF ALUcontrol = 15 THEN
                     op1_select <= 3;
                 END IF;
+            WHEN others =>              -- to cover all other op codes
+                op1_select <= 0;
+                op2_select <= 0;
         END CASE;
     END PROCESS;
 	
