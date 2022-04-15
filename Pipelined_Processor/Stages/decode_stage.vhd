@@ -61,6 +61,8 @@ architecture Behavioral of decode_stage is
     signal ctrl_sigs : std_logic_vector(ctrl_size-1 downto 0);
     signal cur_instruction : std_logic_vector(reg_adrsize-1 downto 0);
     signal last_instruction : std_logic_vector(reg_adrsize-1 downto 0);
+    signal last_rt : std_logic_vector(4 downto 0);
+    signal last_mem_read : std_logic := '0';
     signal last_stall : std_logic := '0';
 begin
     rf : entity work.register_file
@@ -115,6 +117,8 @@ begin
 
                 imm_16 <= instruction_in(15 downto 0);  -- immediate value
                 jump_addr_s <= instruction_in(25 downto 0);
+                
+
             end if;
 
             rs_s <= rs;
@@ -128,7 +132,7 @@ begin
             if opcode = "000000" then   
                 -- hazard detection
                 -- if depency detected ==> stall_out = 1, last_stall = 1
-                if (mem_reg /= "UUUUU" or rs_s /= "UUUUU" or rt_s /= "UUUUU") and (mem_reg = rs_s or mem_reg = rt_s) then
+                if (mem_reg /= "UUUUU" or rs_s /= "UUUUU" or rt_s /= "UUUUU") and (last_mem_read = '1' and (last_rt = rt_s or last_rt = rs_s)) then
                     stall_out <= '1';
                     last_stall <= '1';
                     funct := "111111";
@@ -172,13 +176,14 @@ begin
                 alu_op <= 27;
                 stall_out <= '0';               -- release stall
                 last_stall <= '0';  
-                -- ctrl_sigs <= "UUUUUUUU";        -- control signal to U
-
+                -- ctrl_sigs <= "UUUUUUUU";        -- control signal to U  
+                 
             -------------------- I-instruction--------------------
             else
-                if (mem_reg /= "UUUUU" or rs_s /= "UUUUU") and (mem_reg = rs_s) then  -- if dependency detected
+                if (mem_reg /= "UUUUU" or rs_s /= "UUUUU" or rt_s /= "UUUUU") and (last_mem_read = '1' and last_rt = rs_s) then
                     stall_out <= '1';
                     last_stall <= '1';
+                    opcode := "111111";
                 else 
                     stall_out <= '0';
                     last_stall <= '0';
@@ -224,9 +229,9 @@ begin
                     ctrl_sigs <= "00000000";
                 end if;  
             end if;
+            
 
 
-            last_instruction <= instruction_in;     -- each clock cycle update the last_instruction register to the latest one
         end if;
     end process;
 
@@ -236,10 +241,21 @@ begin
     -- Control signal output
     reg_write <= ctrl_sigs(7); -- determine if a result needs to be written to a register
     reg_dst <= ctrl_sigs(6); -- select the dst reg as either rd(R-type instruction) or rt(I-type instruction)
+    mem_to_reg <= ctrl_sigs(5);
     mem_to_reg <= ctrl_sigs(5); -- if select ALUresult or data memory to WB
     jump <= ctrl_sigs(4);       -- if jump
     branch <= ctrl_sigs(3);     -- if this is a branch instruction
     mem_read <= ctrl_sigs(2);   -- want to read memory: LD
     mem_write <= ctrl_sigs(1);  -- want to write memory: ST
     alu_src <= ctrl_sigs(0); -- select the second ALU input from either rt or sign-extended immediate
+    
+    process(clk)
+      begin
+        if falling_edge(clk) then
+            last_instruction <= instruction_in;     -- each clock cycle update the last_instruction register to the latest one
+            last_rt <= instruction_in(20 downto 16);
+            last_mem_read <= ctrl_sigs(2);
+        end if;
+    end process;
+    
 end Behavioral;
