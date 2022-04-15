@@ -8,7 +8,7 @@ end writebackStage_tb;
 
 architecture behavior of writebackStage_tb is
 
-component writebackStage is
+component writeback_stage is
 generic(
     word_width: integer := 32;
     reg_address_width: integer := 5 
@@ -43,7 +43,7 @@ signal reg_address_out: std_logic_vector (5-1 downto 0);
 signal write_data: std_logic_vector (32-1 downto 0);
 
 begin
-    writeback: writebackStage port map(
+    writeback: writeback_stage port map(
         clock => clk,
 
         read_data => m_read_data,

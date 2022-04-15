@@ -21,6 +21,8 @@ ARCHITECTURE behavior OF register_file_tb IS
         w_enable : in std_logic;
         w_data : in std_logic_vector(31 downto 0);
 
+        regoutput: in std_logic;
+
         r_data1 : out std_logic_vector(31 downto 0);
         r_data2 : out std_logic_vector(31 downto 0)
         );
@@ -36,6 +38,7 @@ ARCHITECTURE behavior OF register_file_tb IS
    signal w_reg : std_logic_vector(4 downto 0) := (others => '0');
    signal w_data : std_logic_vector(31 downto 0) := (others => '0');
 
+   signal regoutput: std_logic := '0';
  	--Outputs
    signal r_data1 : std_logic_vector(31 downto 0);
    signal r_data2 : std_logic_vector(31 downto 0);
@@ -54,6 +57,7 @@ BEGIN
           r_reg2 => r_reg2,
           w_reg => w_reg,
           w_data => w_data,
+          regoutput => regoutput,
           r_data1 => r_data1,
           r_data2 => r_data2
         );
@@ -71,7 +75,7 @@ BEGIN
    -- Stimulus process
    stim_proc: process
    begin		
-      -- hold reset state for 100 ns.
+      -- hold reset state for 1 ns.
       wait for 1 ns;	
 
       -- insert stimulus here
