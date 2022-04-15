@@ -8,7 +8,7 @@ END fetchStage_tb;
  
 ARCHITECTURE behavior OF fetchStage_tb IS 
   
-   component fetchStage is
+   component fetch_stage is
    generic(
       inst_ram_size: integer := 4096; --instruction memory size is 4096 bytes
       bit_width: integer := 32
@@ -46,7 +46,7 @@ ARCHITECTURE behavior OF fetchStage_tb IS
  
 BEGIN
 	-- Instantiate the Unit Under Test (UUT)
-   dut: fetchStage 
+   dut: fetch_stage 
    port map(
       clock          => clk,
       reset          => reset,
@@ -109,8 +109,8 @@ BEGIN
 		t_if_branch   <= '0';
 		t_if_jump     <= '1';
 		wait for clk_period;
-      assert pc = x"00000050" report "Test3: Failed, pc value is not correct" severity error;
-      assert pc_next = x"00000054" report "Test3: Failed, pc_next value is not correct" severity error;
+      assert pc = x"00000050" report "Test4: Failed, pc value is not correct" severity error;
+      assert pc_next = x"00000054" report "Test4: Failed, pc_next value is not correct" severity error;
 		t_if_branch   <= '0';
 		t_if_jump     <= '0';
 		
