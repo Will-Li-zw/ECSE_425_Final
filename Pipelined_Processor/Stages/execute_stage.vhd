@@ -194,9 +194,9 @@ BEGIN
         std_logic_vector(pc_plus_4_out) => pc_plus_4_out_buffer
 	);
 
-    Branch: PROCESS(ALUcontrol, read_data_1, read_data_2) -- JUMP is done in decode stage
+    Branch: PROCESS(ALUcontrol, read_data_1, read_data_2, clk) -- JUMP is done in decode stage
     BEGIN
-    	IF (ALUcontrol > 21) THEN -- Control flow instructions
+        if rising_edge(clk) then
             CASE ALUcontrol IS
                 WHEN 22 => -- beq
                     IF read_data_1 = read_data_2 THEN
@@ -209,9 +209,9 @@ BEGIN
                     ELSE if_branch <= '0';
                     END IF;
                 WHEN Others =>
-                    null;
-                END CASE;
-        END IF;
+                    if_branch <= '0';
+            END CASE;
+        end if;
     END PROCESS;
 
     forwarding: PROCESS(clk)
