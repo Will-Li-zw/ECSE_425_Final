@@ -73,7 +73,13 @@ end execute_stage;
 ARCHITECTURE exe OF execute_stage IS
 
 SIGNAL muxout: signed(31 downto 0);
-
+-- for forwarding logic:
+-- selct 0 means no forwarding, 1 means forward father's result, 2 means forward grandpa's result
+-- 3 means forward lo, 4 means forward hi
+SIGNAL op1_select : integer range 0 to 5 := 0;
+SIGNAL op2_select : integer range 0 to 5 := 0;
+SIGNAL op1 : signed(31 downto 0);
+SIGNAL op2 : signed(31 downto 0);
 -- output intermediate buffer registers to make the circuit synchronous
 SIGNAL reg_address_buffer : std_logic_vector(4 downto 0);
 SIGNAL read_data_2_out_buffer : signed(31 downto 0);
@@ -89,13 +95,6 @@ SIGNAL mem_to_reg_flag_out_buffer : std_logic;
 SIGNAL mem_write_request_out_buffer : std_logic;
 SIGNAL mem_read_request_out_buffer : std_logic;
 
--- for forwarding logic:
--- selct 0 means no forwarding, 1 means forward father's result, 2 means forward grandpa's result
--- 3 means forward lo, 4 means forward hi
-SIGNAL op1_select : integer range 0 to 5 := 0;
-SIGNAL op2_select : integer range 0 to 5 := 0;
-SIGNAL op1 : signed(31 downto 0);
-SIGNAL op2 : signed(31 downto 0);
 -- SIGNAL grandpa_rd : std_logic_vector(4 downto 0) := (others => 'U'); -- previous previous instruction's destination
 -- SIGNAL father_rd : std_logic_vector(4 downto 0) := (others => 'U'); -- previous instruction's destination
 -- SIGNAL grandpa_result : std_logic_vector(31 downto 0) := (others => 'U'); -- previous previous instruction's ALU result
@@ -177,8 +176,8 @@ BEGIN
 	);
 
 	cmpnt_alu: ALU port map(
-		data1 => read_data_1,      -- TODO: For implementing forwarding, we need to change the port mapped data
-        op2 => muxout,
+		data1 => op1,      -- perform ALU operation on op1 and op2
+        op2 => op2,
         ALUcontrol => ALUcontrol,
         extended_imm => extended_lower_15_bits,
         ALUresult => ALUresult_buffer,
@@ -204,7 +203,7 @@ BEGIN
                     ELSE if_branch <= '0';
                     END IF;
                 WHEN 23 => -- bne
-                    IF read_data_1 = read_data_2 THEN
+                    IF read_data_1 /= read_data_2 THEN
                         if_branch <= '1';
                     ELSE if_branch <= '0';
                     END IF;
@@ -215,46 +214,62 @@ BEGIN
     END PROCESS;
 
     -- process for forwarding control signal: op1_select and op2_select
-    forwarding: PROCESS(ALUcontrol, forwarded_exe_exe_reg_addr, mem_exe_reg_addr)
+    forwarding: PROCESS(ALUcontrol, forwarded_exe_exe_reg_addr, mem_exe_reg_addr, rs, rt, clk)
     BEGIN
+        -- if (forwarded_exe_exe_reg_addr /= "UUUUU" )
         CASE ALUcontrol IS
             WHEN 0 | 1 | 3 | 4 | 5 | 7 | 8 | 9 | 10 => -- case 1: rs and rt as oprands (All R-types)
+                -- first judge if operand1 needs forwarding
                 IF rs = forwarded_exe_exe_reg_addr THEN
                     op1_select <= 1; -- father's data
+                    op2_select <= 0;
                 ELSIF rs = mem_exe_reg_addr THEN
                     op1_select <= 2; -- grandpa's data
+                    op2_select <= 0;
                 ELSE -- no need to forward
                     op1_select <= 0;
+                    op2_select <= 0;
                 END IF;
-
+                -- 2nd judge if operand2 needs forwarding
                 IF rt = forwarded_exe_exe_reg_addr THEN
                     op2_select <= 1; -- father's data
+                    op1_select <= 0;
                 ELSIF rt = mem_exe_reg_addr THEN
                     op2_select <= 2; -- grandpa's data
+                    op1_select <= 0;
                 ELSE -- no need to forward
                     op2_select <= 0;
+                    op1_select <= 0;
                 END IF;
             WHEN 2 | 6 | 11 | 12 | 13 | 16 | 20 | 21 | 22 | 23 => -- case 2: rs as oprand only
                 IF rs = forwarded_exe_exe_reg_addr THEN
                     op1_select <= 1; -- father's data
+                    op2_select <= 0;
                 ELSIF rs = mem_exe_reg_addr THEN
                     op1_select <= 2; -- grandpa's data
+                    op2_select <= 0;
                 ELSE -- no need to forward
                     op1_select <= 0;
+                    op2_select <= 0;
                 END IF;
             WHEN 17 | 18 | 19 => -- case 3: rt as oprand only, (shift, R type)
-                IF rt = forwarded_exe_exe_reg_addr THEN
+                IF rt = forwarded_exe_exe_reg_addr THEN    
                     op2_select <= 1; -- father's data
-                ELSIF rt = mem_exe_reg_addr THEN
+                    op1_select <= 0;
+                ELSIF rt = mem_exe_reg_addr THEN   
                     op2_select <= 2; -- grandpa's data
+                    op1_select <= 0;
                 ELSE -- no need to forward
                     op2_select <= 0;
+                    op1_select <= 0;
                 END IF;
             WHEN 14 | 15 => -- case 4: hi and lo as oprand (mfhi, mflo)
                 IF ALUcontrol = 14 THEN
                     op1_select <= 4;
+                    op2_select <= 0;
                 ELSIF ALUcontrol = 15 THEN
                     op1_select <= 3;
+                    op2_select <= 0;
                 END IF;
             WHEN others =>              -- to cover all other op codes
                 op1_select <= 0;
@@ -278,7 +293,7 @@ BEGIN
             mem_write_request_out   <= mem_write_request_out_buffer;
             mem_read_request_out   <= mem_read_request_out_buffer;
             ----------------------- forwarding output logic -----------------------
-            IF reg_sel = '0' THEN -- R type
+            IF reg_sel = '1' THEN -- R type
                 IF ALUcontrol = 3 or ALUcontrol = 4 THEN
                     -- 3: MULT, 4: DIV
                     forwarding_exe_exe_lo_data <= lo_buffer;

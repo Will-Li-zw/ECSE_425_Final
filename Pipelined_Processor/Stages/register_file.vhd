@@ -64,7 +64,7 @@ architecture arch of register_file is
         r_data1 <= r(to_integer(unsigned(r_reg1)));
         r_data2 <= r(to_integer(unsigned(r_reg2)));
 
-        process(clk_rf, reset, w_enable, w_data)
+        process(clk_rf, reset, w_enable, w_data, w_reg)
             begin
             -- async reset
             if reset = '1' then -- check the reset signal

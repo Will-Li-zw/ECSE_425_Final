@@ -273,10 +273,10 @@ architecture behavior of Processor is
 
 	signal mem_wb_reg_enable		: std_logic;	-- carried signal for WB to write register	DEC->...->DEC
 	signal mem_wb_mem_to_reg		: std_logic;	-- carried signal for WB to select data to writeback DEC->...->WB
-    signal forwarding_mem_exe_reg_data : std_logic_vector(word_size-1 downto 0);
-    signal forwarding_mem_exe_reg_addr : std_logic_vector(4 downto 0);
 
     signal CPU_finished             : std_logic;
+    signal datawrite_req_buffer     : std_logic;
+    signal dataread_req_buffer      : std_logic;
 
 
 begin
@@ -386,8 +386,8 @@ begin
         -- forwarding outputs:
         std_logic_vector(forwarding_exe_exe_reg_data) => forward_exe_exe_reg_data,       
         forwarding_exe_exe_reg_addr => forward_exe_exe_reg_addr,
-        std_logic_vector(forwarding_exe_exe_lo_data)  => forward_exe_exe_hi_data,
-        std_logic_vector(forwarding_exe_exe_hi_data)  => forward_exe_exe_lo_data,
+        std_logic_vector(forwarding_exe_exe_lo_data)  => forward_exe_exe_lo_data,
+        std_logic_vector(forwarding_exe_exe_hi_data)  => forward_exe_exe_hi_data,
 
         reg_address => exe_mem_or_wb_reg_addr,
         -- register to be written (WB), for R type instrustion (reg_address = rd)
@@ -436,8 +436,8 @@ begin
         mem_write_request_out	=> datawrite_req,	-- direct output of Processor: data write request
         mem_read_request_out	=> dataread_req,		-- direct output of Processor: data read request
 
-        forwarding_mem_exe_reg_data => forwarding_mem_exe_reg_data,
-        forwarding_mem_exe_reg_addr => forwarding_mem_exe_reg_addr
+        forwarding_mem_exe_reg_data => forward_mem_exe_reg_data,
+        forwarding_mem_exe_reg_addr => forward_mem_exe_reg_addr
    	);
 
 	writer	: writeback_stage
@@ -457,18 +457,32 @@ begin
 	);
 
 	-- output instread_req
-	instruction_read_req : process(reset)
+	Processor_reset : process(reset)
 	begin	
 			-- when pc is available, output inst_read_req = '1', fetch should always try to read memory
 			if reset = '1' then -- reset all control signal
-				instread_req <= '0';
-				datawrite_req<= '0';
-				dataread_req <= '0';
-                CPU_finished <= '0';
+				instread_req        <= '0';
+				-- datawrite_req_buffer<= '0';
+				-- dataread_req_buffer <= '0';
+                CPU_finished        <= '0';
 			else
 				instread_req <= '1';
                 CPU_finished <= '1';
 			end if;
 	end process;
+
+    -- To avoid multiple signal driving datawrite and dataread output signal
+    -- datawrite_req <= datawrite_req_buffer;
+    -- dataread_req  <= dataread_req_buffer;
+
+
+    flush_intermediate : process(ex_if_branch)      -- each time a branch is taken, then flush the intermediate registers
+                                                    -- in the two delay slots
+    begin
+        if rising_edge(ex_if_branch) then
+            -- first flush intermdediate EXE->MEM
+
+        end if;
+    end process;
 
 end behavior;

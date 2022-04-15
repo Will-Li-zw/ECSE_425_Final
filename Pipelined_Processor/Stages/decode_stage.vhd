@@ -142,23 +142,38 @@ begin
                 end if;
                 case(funct) is 
                     when "100000" => alu_op <= 0;         -- 0. add
+                        ctrl_sigs <= "11000000";
                     when "100010" => alu_op <= 1;         -- 1. substract
+                        ctrl_sigs <= "11000000";
                     when "011000" => alu_op <= 3;         -- 3. mult
+                        ctrl_sigs <= "01000000";      
                     when "011010" => alu_op <= 4;         -- 4. div
+                        ctrl_sigs <= "01000000";
                     when "101010" => alu_op <= 5;         -- 5. slt
+                        ctrl_sigs <= "11000000";
                     when "100100" => alu_op <= 7;         -- 7. and
+                        ctrl_sigs <= "11000000";
                     when "100101" => alu_op <= 8;         -- 8. or
+                        ctrl_sigs <= "11000000";
                     when "100111" => alu_op <= 9;         -- 9. nor
+                        ctrl_sigs <= "11000000";
                     when "100110" => alu_op <= 10;        -- 10. xor
+                        ctrl_sigs <= "11000000";
                     when "010000" => alu_op <= 14;        -- 14. mfhi
+                        ctrl_sigs <= "11000000";
                     when "010010" => alu_op <= 15;        -- 15. mflo
+                        ctrl_sigs <= "11000000";
                     when "000000" => alu_op <= 17;        -- 17. sll
+                        ctrl_sigs <= "11000000";
                     when "000010" => alu_op <= 18;        -- 18. srl
+                        ctrl_sigs <= "11000000";
                     when "000011" => alu_op <= 19;        -- 19. sra
+                        ctrl_sigs <= "11000000";
                     when "001000" => alu_op <= 25;        -- 25. jr
+                        ctrl_sigs <= "01000000";
                     when others => alu_op <= 27;
                 end case;
-                ctrl_sigs <= "11000001";
+                -- ctrl_sigs <= "11000000";        -- when R type, the alr_src should be 0 to select register instead of #imm
                 
             -------------------- J-instruction--------------------
             elsif opcode = "000010" then  -- 24. j
@@ -241,7 +256,7 @@ begin
     -- Control signal output
     reg_write <= ctrl_sigs(7); -- determine if a result needs to be written to a register
     reg_dst <= ctrl_sigs(6); -- select the dst reg as either rd(R-type instruction) or rt(I-type instruction)
-    mem_to_reg <= ctrl_sigs(5);
+    -- mem_to_reg <= ctrl_sigs(5);
     mem_to_reg <= ctrl_sigs(5); -- if select ALUresult or data memory to WB
     jump <= ctrl_sigs(4);       -- if jump
     branch <= ctrl_sigs(3);     -- if this is a branch instruction
