@@ -19,7 +19,7 @@ entity execute_stage is
         reg_sel : in std_logic; -- if 0, then pass on rd (R), else, pass on rt (I)
         rt : in std_logic_vector(4 downto 0); 
         rd : in std_logic_vector(4 downto 0);
-        
+        rs : in std_logic_vector(4 downto 0);
         -- control inputs:
 		twomux_sel : in std_logic; -- choose read data 2 or immediate
 
@@ -35,7 +35,8 @@ entity execute_stage is
         mem_exe_reg_addr    : in std_logic_vector(4 downto 0); 
         forwarded_exe_exe_reg_data    : in signed(31 downto 0);             -- account for EXE->EXE forwarding
         forwarded_exe_exe_reg_addr    : in std_logic_vector(4 downto 0); 
-        
+        forwarded_exe_exe_lo_data    : in signed(31 downto 0);              -- account for EXE->EXE forwarding
+        forwarded_exe_exe_hi_data    : in signed(31 downto 0);              -- account for EXE->EXE forwarding
        
         
         ---------------
@@ -43,7 +44,9 @@ entity execute_stage is
         ---------------
         -- forwarding outputs:
         forwarding_exe_exe_reg_data    : out signed(31 downto 0);           -- output forwarding to next CC EXE
-        forwarding_exe_exe_reg_addr    : out std_logic_vector(4 downto 0); 
+        forwarding_exe_exe_lo_data    : out signed(31 downto 0);           -- output forwarding to next CC EXE
+        forwarding_exe_exe_hi_data    : out signed(31 downto 0);           -- output forwarding to next CC EXE
+        forwarding_exe_exe_reg_addr    : out std_logic_vector(4 downto 0);
 
         reg_address : out std_logic_vector(4 downto 0);
         -- register to be written (WB), for R type instrustion (reg_address = rd)
@@ -86,20 +89,26 @@ SIGNAL mem_to_reg_flag_out_buffer : std_logic;
 SIGNAL mem_write_request_out_buffer : std_logic;
 SIGNAL mem_read_request_out_buffer : std_logic;
 
--- for forwarding logic: option 0 means no forwarding, 1 means forward father's result, 2 means forward grandpa's result
-SIGNAL op1_option : integer range 0 to 3 := 0;
-SIGNAL op2_option : integer range 0 to 3 := 0;
-SIGNAL grandpa_rd : std_logic_vector(4 downto 0) := (others => 'U'); -- previous previous instruction's destination
-SIGNAL father_rd : std_logic_vector(4 downto 0) := (others => 'U'); -- previous instruction's destination
-SIGNAL grandpa_result : std_logic_vector(31 downto 0) := (others => 'U'); -- previous previous instruction's ALU result
-SIGNAL father_result : std_logic_vector(31 downto 0) := (others => 'U'); -- previous instruction's ALU result
+-- for forwarding logic:
+-- selct 0 means no forwarding, 1 means forward father's result, 2 means forward grandpa's result
+-- 3 means forward lo, 4 means forward hi
+SIGNAL op1_select : integer range 0 to 5 := 0;
+SIGNAL op2_select : integer range 0 to 5 := 0;
+SIGNAL op1 : signed(31 downto 0);
+SIGNAL op2 : signed(31 downto 0);
+-- SIGNAL grandpa_rd : std_logic_vector(4 downto 0) := (others => 'U'); -- previous previous instruction's destination
+-- SIGNAL father_rd : std_logic_vector(4 downto 0) := (others => 'U'); -- previous instruction's destination
+-- SIGNAL grandpa_result : std_logic_vector(31 downto 0) := (others => 'U'); -- previous previous instruction's ALU result
+-- SIGNAL father_result : std_logic_vector(31 downto 0) := (others => 'U'); -- previous instruction's ALU result
 
-COMPONENT THREEMUX IS -- for forward logic
+COMPONENT FIVEMUX IS -- for forward logic
 	port (
-			sel : IN integer range 0 to 3;
+			sel : IN integer range 0 to 5;
 			input0 : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
 			input1 : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
             input2 : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
+            input3 : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
+            input4 : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
 			output : OUT STD_LOGIC_VECTOR (31 DOWNTO 0)
     );
 END COMPONENT;
@@ -139,20 +148,26 @@ END COMPONENT;
 
 BEGIN
 
-    -- TODO: forward muxs
-	-- cmpnt_fwd1_threemux: THREEMUX port map( -- for choosing first ALU operand
-	-- 	sel             => twomux_sel,
-    --     input0          => std_logic_vector(read_data_2),        -- to match type
-    --     input1          => std_logic_vector(extended_lower_15_bits),
-    --     signed(output)  => muxout
-	-- );
+    -- TODO: forward muxs change port maps
+	cmpnt_fwd1_fivemux: FIVEMUX port map( -- for choosing first ALU operand
+		sel             => op1_select,
+        input0          => std_logic_vector(read_data_1),        -- to match type
+        input1          => std_logic_vector(forwarded_exe_exe_reg_data),
+        input2          => std_logic_vector(mem_exe_reg_data),
+        input3          => std_logic_vector(forwarded_exe_exe_lo_data),
+        input4          => std_logic_vector(forwarded_exe_exe_hi_data),
+        signed(output)  => op1
+	);
     
-	-- cmpnt_fwd2_threemux: THREEMUX port map( -- for choosing second ALU operand
-	-- 	sel             => twomux_sel,
-    --     input0          => std_logic_vector(read_data_2),        -- to match type
-    --     input1          => std_logic_vector(extended_lower_15_bits),
-    --     signed(output)  => muxout
-	-- );
+	cmpnt_fwd2_fivemux: FIVEMUX port map( -- for choosing second ALU operand
+        sel             => op2_select,
+        input0          => std_logic_vector(muxout),        -- to match type
+        input1          => std_logic_vector(forwarded_exe_exe_reg_data),
+        input2          => std_logic_vector(mem_exe_reg_data),
+        input3          => std_logic_vector(forwarded_exe_exe_lo_data),
+        input4          => std_logic_vector(forwarded_exe_exe_hi_data),
+        signed(output)  => op2
+	);
 
 	cmpnt_twomux: TWOMUX port map(
 		sel             => twomux_sel,
@@ -201,13 +216,49 @@ BEGIN
 
     forwarding: PROCESS(clk)
     BEGIN
-    	IF (ALUcontrol /= 24) and (ALUcontrol /= 26) THEN -- possibe forwarding
-        	IF reg_sel = '0' THEN -- R type instruction
-                null; -- TODO
-            ELSE -- I type instruction
-            	null; -- TODO
-            END IF;
-        END IF;
+        CASE ALUcontrol IS
+            WHEN 0 | 1 | 3 | 4 | 5 | 7 | 8 | 9 | 10 => -- case 1: rs and rt as oprands (All R-types)
+                IF rs = forwarded_exe_exe_reg_addr THEN
+                    op1_select <= 1; -- father's data
+                ELSIF rs = mem_exe_reg_addr THEN
+                    op1_select <= 2; -- grandpa's data
+                ELSE -- no need to forward
+                    op1_select <= 0;
+                END IF;
+
+                IF rt = forwarded_exe_exe_reg_addr THEN
+                    op2_select <= 1; -- father's data
+                ELSIF rt = mem_exe_reg_addr THEN
+                    op2_select <= 2; -- grandpa's data
+                ELSE -- no need to forward
+                    op2_select <= 0;
+                END IF;
+            WHEN 2 | 6 | 11 | 12 | 13 | 16 | 20 | 21 | 22 | 23 => -- case 2: rs as oprand only
+                IF rs = forwarded_exe_exe_reg_addr THEN
+                    op1_select <= 1; -- father's data
+                ELSIF rs = mem_exe_reg_addr THEN
+                    op1_select <= 2; -- grandpa's data
+                ELSE -- no need to forward
+                    op1_select <= 0;
+                END IF;
+            WHEN 17 | 18 | 19 => -- case 3: rt as oprand only, (shift, R type)
+                IF rt = forwarded_exe_exe_reg_addr THEN
+                    op2_select <= 1; -- father's data
+                ELSIF rt = mem_exe_reg_addr THEN
+                    op2_select <= 2; -- grandpa's data
+                ELSE -- no need to forward
+                    op2_select <= 0;
+                END IF;
+            WHEN 14 | 15 => -- case 4: hi and lo as oprand (mfhi, mflo)
+                IF ALUcontrol = 14 THEN
+                    op1_select <= 4;
+                ELSIF ALUcontrol = 15 THEN
+                    op1_select <= 3;
+                END IF;
+            WHEN others =>              -- to cover all other op codes
+                op1_select <= 0;
+                op2_select <= 0;
+        END CASE;
     END PROCESS;
 	
 	PROCESS(clk) 
@@ -225,7 +276,22 @@ BEGIN
             mem_to_reg_flag_out     <= mem_to_reg_flag_out_buffer;
             mem_write_request_out   <= mem_write_request_out_buffer;
             mem_read_request_out   <= mem_read_request_out_buffer;
-            
+            ----------------------- forwarding output logic -----------------------
+            IF reg_sel = '0' THEN -- R type
+                IF ALUcontrol = 3 or ALUcontrol = 4 THEN
+                    -- 3: MULT, 4: DIV
+                    forwarding_exe_exe_lo_data <= lo_buffer;
+                    forwarding_exe_exe_hi_data <= hi_buffer;
+                ELSE
+                    -- Normal R type instruction, which uses Rd to store ALU result
+                    forwarding_exe_exe_reg_addr <= rd;
+                    forwarding_exe_exe_reg_data <= ALUresult_buffer;
+                END IF;
+            ELSE -- I type
+                forwarding_exe_exe_reg_addr <= rt;
+                forwarding_exe_exe_reg_data <= ALUresult_buffer;
+            END IF;
+            -----------------------------------------------------------------------
 		END IF;
 	END process; -- end process
     

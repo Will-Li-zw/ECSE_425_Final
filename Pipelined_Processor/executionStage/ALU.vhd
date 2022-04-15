@@ -115,12 +115,12 @@ BEGIN
                 
 			WHEN 14 => -- mfhi (nothing to do in execution stage)
 				report "The value of 'ALUcontrol' is " & integer'image(ALUcontrol);
-				
+				ALUresult_buffer <= data1;
                 null;
                 
 			WHEN 15 => -- mflo (nothing to do in execution stage)
 				report "The value of 'ALUcontrol' is " & integer'image(ALUcontrol);
-				
+				ALUresult_buffer <= data1;
                 null;
                 
 			WHEN 16 => -- lui (load from upper)
