@@ -1,14 +1,16 @@
 proc AddWaves {} {
 	;#Add waves we're interested in to the Wave window
     add wave -position insertpoint sim:/pipelined_mips_processor_tb/*
-    add wave -position end sim:/pipelined_mips_processor_tb/my_processor/fetcher/*
-    add wave -position end sim:/pipelined_mips_processor_tb/my_processor/decoder/*
-    add wave -position end sim:/pipelined_mips_processor_tb/my_processor/decoder/rf/r   ;# the register files array
-    add wave -position end sim:/pipelined_mips_processor_tb/my_processor/executer/*
-    add wave -position end sim:/pipelined_mips_processor_tb/my_processor/memoryer/*
-    add wave -position end sim:/pipelined_mips_processor_tb/my_processor/writer/*
-    add wave -position end sim:/pipelined_mips_processor_tb/my_mem/inst_ram_block
-    add wave -position end sim:/pipelined_mips_processor_tb/my_mem/data_ram_block
+    add wave -position insertpoint sim:/pipelined_mips_processor_tb/my_processor/fetcher/*
+    add wave -position insertpoint sim:/pipelined_mips_processor_tb/my_processor/decoder/*
+    add wave -position insertpoint sim:/pipelined_mips_processor_tb/my_processor/decoder/rf/r   ;# the register files array
+    add wave -position insertpoint sim:/pipelined_mips_processor_tb/my_processor/executer/*
+    add wave -position insertpoint sim:/pipelined_mips_processor_tb/my_processor/memoryer/*
+    add wave -position insertpoint sim:/pipelined_mips_processor_tb/my_processor/writer/*
+    add wave -position insertpoint  \                                                           ;# the memory array
+            sim:/pipelined_mips_processor_tb/my_mem/inst_ram_block \
+            sim:/pipelined_mips_processor_tb/my_mem/data_ram_block
+
 }
 
 vlib work
@@ -28,9 +30,9 @@ vcom writeback_stage.vhd
 vcom Processor.vhd
 vcom Pipelined_MIPS_Processor_tb.vhd
 
+
 ;# Start simulation
-;# vsim work.pipelined_mips_processor_tb
-vsim -novopt -O0 pipelined_mips_processor_tb
+vsim pipelined_mips_processor_tb
 
 ;# Generate a clock with 1ns period
 force -deposit clk 0 0 ns, 1 0.5 ns -repeat 1 ns
@@ -39,7 +41,7 @@ force -deposit clk 0 0 ns, 1 0.5 ns -repeat 1 ns
 AddWaves
 
 ;# change radix
-;# radix signal sim:/pipelined_mips_processor_tb/* Hexadecimal
+radix signal sim:/pipelined_mips_processor_tb/* Hexadecimal
 radix signal sim:/pipelined_mips_processor_tb/my_processor/fetcher/* Hexadecimal
 radix signal sim:/pipelined_mips_processor_tb/my_processor/decoder/* Hexadecimal
 radix signal sim:/pipelined_mips_processor_tb/my_processor/decoder/rf/r Hexadecimal
@@ -50,5 +52,5 @@ radix signal sim:/pipelined_mips_processor_tb/my_mem/inst_ram_block Hexadecimal
 radix signal sim:/pipelined_mips_processor_tb/my_mem/data_ram_block Hexadecimal
 
 
-;# Run for 55 ns, testbench2 stops at 52.5ns
-run 55 ns
+;# Run for 51.5 ns
+run 51.5 ns
