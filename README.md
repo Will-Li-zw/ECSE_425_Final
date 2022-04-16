@@ -15,7 +15,7 @@
 5. **The console may report error:**  
 ![image](https://user-images.githubusercontent.com/54852475/163653827-138fe6f7-932e-48f0-8e14-951a002f7da8.png)  
 6. Ignore the error and goto wave window
-7. Make sure the time to run is 6.5ns for testbench2
+7. Make sure the time to run is 6.5ns for testbench1
 8. Show the result:
 ![image](https://user-images.githubusercontent.com/54852475/163653939-7dec9551-260a-4491-9c82-e786ab60a8b1.png)
 
