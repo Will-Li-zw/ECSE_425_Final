@@ -23,7 +23,7 @@
 2. Use Modelsim to open the project file: benchmark1.mpf  
 3. Make sure all files needed to run are included:
 ![image](https://user-images.githubusercontent.com/54852475/163653747-6d7b24a7-cc53-441f-a9f8-3112c6aeb199.png)  
-4. Run the command: `source benchmark1.tcl` in the console   
+4. Run the command: `source benchmark1_tb.tcl` in the console   
 5. **The console may report error:**  
 ![image](https://user-images.githubusercontent.com/54852475/163653827-138fe6f7-932e-48f0-8e14-951a002f7da8.png)  
 6. Ignore the error and goto wave window
