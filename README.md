@@ -16,7 +16,7 @@
 |Writeback_stage|unit test write back stage|writeback_stage.vhd + writebackStage_tb.vhd  + TWOMUX.vhd| 6ns|
 |Memory|component test memory|memory.vhd + memory_tb.vhd|15ns|
 
-*** Decode stage unit testing may have compilatoin errors for one file. In that case, compile only the failed file again.
+*** Decode stage unit testing may have compilatoin errors for one file. In that case, compile only the failed file again and it will compile successfully. It is an compile order issue.
 
 ----
 #### Benchmark1 -- Entry point
