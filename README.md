@@ -1,17 +1,30 @@
-# ECSE_425_Final
+# ECSE_425_Final :trollface:
 
 ## Welcome to the repository of Group06 ECSE425 Final Project - Pipelined Processor
 
-### How to run our program?
+### How to run our program?:partying_face:
 ----
 #### Unit Tests:
 ----
 #### Benchmark1 -- Entry point
+1. Go to the benchmark1 directory
+2. Use Modelsim to open the project file: benchmark1.mpf  
+3. Make sure all files needed to run are included:
+![image](https://user-images.githubusercontent.com/54852475/163653747-6d7b24a7-cc53-441f-a9f8-3112c6aeb199.png)  
+4. Run the command: `source benchmark1.tcl` in the console   
+5. **The console may report error:**  
+![image](https://user-images.githubusercontent.com/54852475/163653827-138fe6f7-932e-48f0-8e14-951a002f7da8.png)  
+6. Ignore the error and goto wave window
+7. Make sure the time to run is 6.5ns for testbench2
+8. Show the result:
+![image](https://user-images.githubusercontent.com/54852475/163653939-7dec9551-260a-4491-9c82-e786ab60a8b1.png)
+
+
 ----
-#### Benchmark2 -- Fibonacci
+#### Benchmark2 -- Fibonacci :u6709:
 __Note: In this project, we assume that the end of program is not an infinite loop instruction. Our CPU will determine when is the end of the instruction by itself since when loading the instructions from "program.txt", we assigned the rest of instruction memory as undefined.__
 
-1. Go to the integration directory
+1. Go to the benchmark2 directory
 2. Use Modelsim to open the project file: processor.mpf
 3. Make sure all files needed to run are included:  
 ![image](https://user-images.githubusercontent.com/54852475/163636158-4a811603-194b-4c20-b5ef-81a1dcc61e77.png)
