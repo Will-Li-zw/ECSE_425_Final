@@ -22,9 +22,9 @@ VB1z7G_L70<K_8cB1nCX_G0
 !s100 kI^VJH[CXhH?7_^1kjn>@1
 Z7 OV;C;10.5b;63
 32
-Z8 !s110 1650066608
+Z8 !s110 1650067503
 !i10b 1
-Z9 !s108 1650066608.000000
+Z9 !s108 1650067503.000000
 Z10 !s90 -reportprogress|300|ADD.vhd|
 Z11 !s107 ADD.vhd|
 !i113 1
@@ -100,16 +100,16 @@ V8dlDZZ@H[obg3`OX3AAA90
 !s100 75jPJmEkM^zf:EzP6kM>K0
 R7
 32
-Z21 !s110 1650066609
+R8
 !i10b 1
 R9
-Z22 !s90 -reportprogress|300|decode_stage.vhd|
-Z23 !s107 decode_stage.vhd|
+Z21 !s90 -reportprogress|300|decode_stage.vhd|
+Z22 !s107 decode_stage.vhd|
 !i113 1
 R12
 Abehavioral
-Z24 DPx4 ieee 16 std_logic_textio 0 22 V5TSK`;aJKC<l]CEg1>mz1
-Z25 DEx4 work 13 register_file 0 22 hS5a=8<MKW2WJXJ]<3>om1
+Z23 DPx4 ieee 16 std_logic_textio 0 22 V5TSK`;aJKC<l]CEg1>mz1
+Z24 DEx4 work 13 register_file 0 22 hS5a=8<MKW2WJXJ]<3>om1
 R1
 R2
 R3
@@ -120,32 +120,32 @@ V1gIDIdZ^hZPJ1_lN3EHW60
 !s100 ;CSaDlYFeO6IDNdV0]7Ln2
 R7
 32
-R21
+R8
 !i10b 1
 R9
+R21
 R22
-R23
 !i113 1
 R12
 Eexecute_stage
-Z26 w1650052992
+Z25 w1650052992
 R1
 R2
 R3
 R4
-Z27 8execute_stage.vhd
-Z28 Fexecute_stage.vhd
+Z26 8execute_stage.vhd
+Z27 Fexecute_stage.vhd
 l0
 L6
 V=GcAb7@cE10h?M6feIZBI3
 !s100 @>O<8:<M8z6VQ[;hJ]ZKB3
 R7
 32
-R21
+R8
 !i10b 1
-Z29 !s108 1650066609.000000
-Z30 !s90 -reportprogress|300|execute_stage.vhd|
-Z31 !s107 execute_stage.vhd|
+R9
+Z28 !s90 -reportprogress|300|execute_stage.vhd|
+Z29 !s107 execute_stage.vhd|
 !i113 1
 R12
 Aexe
@@ -159,21 +159,21 @@ V;KElZnzIF??:h:[14g2Ag1
 !s100 F2D6MdbZeXJG]4^eFAk4H1
 R7
 32
-R21
+R8
 !i10b 1
+R9
+R28
 R29
-R30
-R31
 !i113 1
 R12
 Efetch_stage
-Z32 w1649991505
+Z30 w1649991505
 R1
 R2
 R3
 R4
-Z33 8fetch_stage.vhd
-Z34 Ffetch_stage.vhd
+Z31 8fetch_stage.vhd
+Z32 Ffetch_stage.vhd
 l0
 L5
 VRFG4hUhjfcP_LCXfBYaDg2
@@ -183,8 +183,8 @@ R7
 R8
 !i10b 1
 R9
-Z35 !s90 -reportprogress|300|fetch_stage.vhd|
-Z36 !s107 fetch_stage.vhd|
+Z33 !s90 -reportprogress|300|fetch_stage.vhd|
+Z34 !s107 fetch_stage.vhd|
 !i113 1
 R12
 Aarch
@@ -201,17 +201,17 @@ R7
 R8
 !i10b 1
 R9
-R35
-R36
+R33
+R34
 !i113 1
 R12
 Efivemux
-Z37 w1649991515
+Z35 w1649991515
 R2
 R3
 R4
-Z38 8FIVEMUX.vhd
-Z39 FFIVEMUX.vhd
+Z36 8FIVEMUX.vhd
+Z37 FFIVEMUX.vhd
 l0
 L4
 VWDP=DF?2P[a2o_iAlHJO>0
@@ -221,8 +221,8 @@ R7
 R8
 !i10b 1
 R9
-Z40 !s90 -reportprogress|300|FIVEMUX.vhd|
-Z41 !s107 FIVEMUX.vhd|
+Z38 !s90 -reportprogress|300|FIVEMUX.vhd|
+Z39 !s107 FIVEMUX.vhd|
 !i113 1
 R12
 Amux5
@@ -238,19 +238,19 @@ R7
 R8
 !i10b 1
 R9
-R40
-R41
+R38
+R39
 !i113 1
 R12
 Ememory
-R32
-R24
+R30
+R23
 R1
 R2
 R3
 R4
-Z42 8memory.vhd
-Z43 Fmemory.vhd
+Z40 8memory.vhd
+Z41 Fmemory.vhd
 l0
 L10
 V]?Sfc<@7aKfl^z?4SfN;b3
@@ -260,12 +260,12 @@ R7
 R8
 !i10b 1
 R9
-Z44 !s90 -reportprogress|300|memory.vhd|
-Z45 !s107 memory.vhd|
+Z42 !s90 -reportprogress|300|memory.vhd|
+Z43 !s107 memory.vhd|
 !i113 1
 R12
 Abehavior
-R24
+R23
 R1
 R2
 R3
@@ -279,28 +279,28 @@ R7
 R8
 !i10b 1
 R9
-R44
-R45
+R42
+R43
 !i113 1
 R12
 Ememory_stage
-Z46 w1650039237
+Z44 w1650039237
 R2
 R3
 R4
-Z47 8memory_stage.vhd
-Z48 Fmemory_stage.vhd
+Z45 8memory_stage.vhd
+Z46 Fmemory_stage.vhd
 l0
 L4
 VEiAzD6AZHj^GK=L8g__O81
 !s100 eUbN@0<z`J4b@Ef4]mo`o3
 R7
 32
-R21
+R8
 !i10b 1
-R29
-Z49 !s90 -reportprogress|300|memory_stage.vhd|
-Z50 !s107 memory_stage.vhd|
+R9
+Z47 !s90 -reportprogress|300|memory_stage.vhd|
+Z48 !s107 memory_stage.vhd|
 !i113 1
 R12
 Abehavior
@@ -313,78 +313,78 @@ V7jfD@ZClhmcD<ACaT@5R]2
 !s100 `Hm24_580@03E13;3h7Z;0
 R7
 32
-R21
+R8
 !i10b 1
-R29
-R49
-R50
+R9
+R47
+R48
 !i113 1
 R12
 Epipelined_mips_processor_tb
-Z51 w1649979105
-R24
+Z49 w1649979105
+R23
 R1
 R2
 R3
 R4
-Z52 8Pipelined_MIPS_Processor_tb.vhd
-Z53 FPipelined_MIPS_Processor_tb.vhd
+Z50 8Pipelined_MIPS_Processor_tb.vhd
+Z51 FPipelined_MIPS_Processor_tb.vhd
 l0
 L7
 VgKzYeGhgoWXe?1;c?ACUK3
 !s100 H=H8UBV9QTO0d_Gg9;e>81
 R7
 32
-R21
+R8
 !i10b 1
-R29
-Z54 !s90 -reportprogress|300|Pipelined_MIPS_Processor_tb.vhd|
-Z55 !s107 Pipelined_MIPS_Processor_tb.vhd|
+R9
+Z52 !s90 -reportprogress|300|Pipelined_MIPS_Processor_tb.vhd|
+Z53 !s107 Pipelined_MIPS_Processor_tb.vhd|
 !i113 1
 R12
 Abehavior
-R24
+R23
 R1
 R2
 R3
-Z56 DEx4 work 27 pipelined_mips_processor_tb 0 22 gKzYeGhgoWXe?1;c?ACUK3
+Z54 DEx4 work 27 pipelined_mips_processor_tb 0 22 gKzYeGhgoWXe?1;c?ACUK3
 l92
 L10
-Z57 V?eRdCXjW6[]aH3KkKzcE83
-Z58 !s100 Q4G:10;H^Ded;E6`Ligek1
+Z55 V?eRdCXjW6[]aH3KkKzcE83
+Z56 !s100 Q4G:10;H^Ded;E6`Ligek1
 R7
 32
-R21
+R8
 !i10b 1
-R29
-R54
-R55
+R9
+R52
+R53
 !i113 1
 R12
 Eprocessor
-Z59 w1650054098
-R24
+Z57 w1650054098
+R23
 R1
 R2
 R3
 R4
-Z60 8Processor.vhd
-Z61 FProcessor.vhd
+Z58 8Processor.vhd
+Z59 FProcessor.vhd
 l0
 L10
 Ve<EZi=4M4BV;XO]oRKMf`3
 !s100 jOA@^ECaK55S_bTlC7BOL1
 R7
 32
-R21
+R8
 !i10b 1
-R29
-Z62 !s90 -reportprogress|300|Processor.vhd|
-Z63 !s107 Processor.vhd|
+R9
+Z60 !s90 -reportprogress|300|Processor.vhd|
+Z61 !s107 Processor.vhd|
 !i113 1
 R12
 Abehavior
-R24
+R23
 R1
 R2
 R3
@@ -395,22 +395,22 @@ VWB73iQnVn`7@UfFn69`173
 !s100 FTcBOaLz:Bf@SMgMWma;m1
 R7
 32
-R21
+R8
 !i10b 1
-R29
-R62
-R63
+R9
+R60
+R61
 !i113 1
 R12
 Eregister_file
-Z64 w1650023994
-R24
+Z62 w1650023994
+R23
 R1
 R2
 R3
 R4
-Z65 8register_file.vhd
-Z66 Fregister_file.vhd
+Z63 8register_file.vhd
+Z64 Fregister_file.vhd
 l0
 L9
 VhS5a=8<MKW2WJXJ]<3>om1
@@ -420,16 +420,16 @@ R7
 R8
 !i10b 1
 R9
-Z67 !s90 -reportprogress|300|register_file.vhd|
-Z68 !s107 register_file.vhd|
+Z65 !s90 -reportprogress|300|register_file.vhd|
+Z66 !s107 register_file.vhd|
 !i113 1
 R12
 Aarch
-R24
+R23
 R1
 R2
 R3
-R25
+R24
 l52
 L32
 V1[=nheh^nBOg4R>iZi:H31
@@ -439,17 +439,17 @@ R7
 R8
 !i10b 1
 R9
-R67
-R68
+R65
+R66
 !i113 1
 R12
 Etwomux
-Z69 w1649709981
+Z67 w1649709981
 R2
 R3
 R4
-Z70 8TWOMUX.vhd
-Z71 FTWOMUX.vhd
+Z68 8TWOMUX.vhd
+Z69 FTWOMUX.vhd
 l0
 L4
 V?Q@_XHclL44fBJZNGi=S43
@@ -459,8 +459,8 @@ R7
 R8
 !i10b 1
 R9
-Z72 !s90 -reportprogress|300|TWOMUX.vhd|
-Z73 !s107 TWOMUX.vhd|
+Z70 !s90 -reportprogress|300|TWOMUX.vhd|
+Z71 !s107 TWOMUX.vhd|
 !i113 1
 R12
 Amux2
@@ -476,28 +476,28 @@ R7
 R8
 !i10b 1
 R9
-R72
-R73
+R70
+R71
 !i113 1
 R12
 Ewriteback_stage
-Z74 w1649270971
+Z72 w1649270971
 R2
 R3
 R4
-Z75 8writeback_stage.vhd
-Z76 Fwriteback_stage.vhd
+Z73 8writeback_stage.vhd
+Z74 Fwriteback_stage.vhd
 l0
 L5
 Vfn8nVFL728TL=P3_bQEli1
 !s100 I0;271EoYCE_4gNOJlEFC1
 R7
 32
-R21
+R8
 !i10b 1
-R29
-Z77 !s90 -reportprogress|300|writeback_stage.vhd|
-Z78 !s107 writeback_stage.vhd|
+R9
+Z75 !s90 -reportprogress|300|writeback_stage.vhd|
+Z76 !s107 writeback_stage.vhd|
 !i113 1
 R12
 Abehavior
@@ -510,10 +510,10 @@ VzlT5T3;KV?17L1P2Wc7@90
 !s100 <k]>G;FDF`E?>ONkXizCA1
 R7
 32
-R21
+R8
 !i10b 1
-R29
-R77
-R78
+R9
+R75
+R76
 !i113 1
 R12
