@@ -7,7 +7,7 @@
 #### Unit Tests:
 | Unit under | Testing Directory | File required  |  Runtime
 | ----------- | ----------- |  ----------- | ----------- |
-|Fetch_stage |unit test fetch| stage fetch_stage.vhd + fetchStage_tb.vhd	| 15ns|
+|Fetch_stage |unit test fetch stage| fetch_stage.vhd + fetchStage_tb.vhd	| 15ns|
 |Decode_stage| unit test decode stage |decode_stage.vhd + decodeStage_tb.vhd + register_file.vhd|20ns|
 |Register_file|component test register file|register_file.vhd + register_file_tb.vhd |20ns|
 |Execute_stage|unit test execute stage|execute_stage.vhd + executeStage_tb.vhd + TWOMUX.vhd + ADD.vhd + FIVEMUX.vhd + ALU.vhd|16ns|
