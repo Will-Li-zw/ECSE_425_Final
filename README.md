@@ -12,8 +12,8 @@
 |Register_file|component test register file|register_file.vhd + register_file_tb.vhd |20ns|
 |Execute_stage|unit test execute stage|execute_stage.vhd + executeStage_tb.vhd + TWOMUX.vhd + ADD.vhd + FIVEMUX.vhd + ALU.vhd|16ns|
 |ALU |component test ALU|ALU.vhd	+ ALUUnit.vhd |10ns|
-|Memory_stage|unit test memory stage|memory_stage.vhd + memoryStage_tb.vhd + TWOMUX.vhd |20ns|
-|Writeback_stage|unit test write back stage|writeback_stage.vhd + writebackStage_tb.vhd| 6ns|
+|Memory_stage|unit test memory stage|memory_stage.vhd + memoryStage_tb.vhd |20ns|
+|Writeback_stage|unit test write back stage|writeback_stage.vhd + writebackStage_tb.vhd  + TWOMUX.vhd| 6ns|
 |Memory|component test memory|memory.vhd + memory_tb.vhd|15ns|
 
 
